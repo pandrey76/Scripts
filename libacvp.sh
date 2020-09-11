@@ -26,6 +26,7 @@ LIBACVP_INSTALL_FOLDER="${INSTALL_FOLDER_PROJECT}/libacvp_install"
 wget https://www.openssl.org/source/openssl-1.1.1b.tar.gz && tar -xf openssl-1.1.1b.tar.gz -C "${SOURCE_FOLDER_PROJECT}"
 mv -f openssl-1.1.1b.tar.gz "${ARCHIVE_FOLDER_PROJECT}"
 export OPENSSL_INSTALL="${OPENSSL_INSTALL_FOLDER}"
+# Adding debug build ( ./config -d )
 cd "${SOURCE_FOLDER_PROJECT}/openssl-1.1.1b" && ./config shared -d --prefix="${OPENSSL_INSTALL}" && make clean && make && make install
 #
 ## Install Curl for network transport
@@ -34,7 +35,8 @@ wget https://curl.haxx.se/download/curl-7.64.1.tar.gz && tar -xf curl-7.64.1.tar
 mv -f curl-7.64.1.tar.gz "${ARCHIVE_FOLDER_PROJECT}"
 ##
 export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${OPENSSL_INSTALL}/lib"
-cd "${SOURCE_FOLDER_PROJECT}/curl-7.64.1" && CFLAGS="-O0 -g" ./configure --prefix="${CURL_INSTALL}" --with-ssl="${OPENSSL_INSTALL}" && make && make install
+# Adding debug build ( ./configure --enable-debug )
+cd "${SOURCE_FOLDER_PROJECT}/curl-7.64.1" && ./configure --enable-debug --prefix="${CURL_INSTALL}" --with-ssl="${OPENSSL_INSTALL}" && make && make install
 ##
 export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${CURL_INSTALL/lib}"
 
@@ -44,6 +46,7 @@ cd "${SOURCE_FOLDER_PROJECT}"
 git clone "https://github.com/cisco/libacvp.git"
 cd "libacvp"
 ##
+# Adding debug build ( CFLAGS="-O0 -g" ./configure )
 CFLAGS="-O0 -g" ./configure --with-ssl-dir="$OPENSSL_INSTALL" --with-libcurl-dir="$CURL_INSTALL" --prefix="${LIBACVP_INSTALL_FOLDER}" && make && make install
 #
 export ACV_SERVER="demo.acvts.nist.gov"
