@@ -23,7 +23,11 @@ OPENSSL_INSTALL_FOLDER="${INSTALL_FOLDER_PROJECT}/openssl-1.1.1b_install"
 CURL_INSTALL_FOLDER="${INSTALL_FOLDER_PROJECT}/curl-7.64.1_install"
 LIBACVP_INSTALL_FOLDER="${INSTALL_FOLDER_PROJECT}/libacvp_install"
 
-wget https://www.openssl.org/source/openssl-1.1.1b.tar.gz && tar -xf openssl-1.1.1b.tar.gz -C "${SOURCE_FOLDER_PROJECT}"
+# wget https://www.openssl.org/source/openssl-1.1.1b.tar.gz && tar -xf openssl-1.1.1b.tar.gz -C "${SOURCE_FOLDER_PROJECT}"
+
+# --no-check-certificate
+wget --no-check-certificate https://www.openssl.org/source/openssl-1.1.1b.tar.gz && tar -xf openssl-1.1.1b.tar.gz -C "${SOURCE_FOLDER_PROJECT}"
+
 mv -f openssl-1.1.1b.tar.gz "${ARCHIVE_FOLDER_PROJECT}"
 export OPENSSL_INSTALL="${OPENSSL_INSTALL_FOLDER}"
 # Adding debug build ( ./config -d )
@@ -31,7 +35,11 @@ cd "${SOURCE_FOLDER_PROJECT}/openssl-1.1.1b" && ./config shared -d --prefix="${O
 #
 ## Install Curl for network transport
 export CURL_INSTALL="${CURL_INSTALL_FOLDER}"
-wget https://curl.haxx.se/download/curl-7.64.1.tar.gz && tar -xf curl-7.64.1.tar.gz -C "${SOURCE_FOLDER_PROJECT}"
+# wget https://curl.haxx.se/download/curl-7.64.1.tar.gz && tar -xf curl-7.64.1.tar.gz -C "${SOURCE_FOLDER_PROJECT}"
+
+# --no-check-certificate
+wget --no-check-certificate https://curl.haxx.se/download/curl-7.64.1.tar.gz && tar -xf curl-7.64.1.tar.gz -C "${SOURCE_FOLDER_PROJECT}"
+
 mv -f curl-7.64.1.tar.gz "${ARCHIVE_FOLDER_PROJECT}"
 ##
 export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${OPENSSL_INSTALL}/lib"
