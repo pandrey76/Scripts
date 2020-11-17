@@ -52,7 +52,13 @@ export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${CURL_INSTALL/lib}"
 cd "${SOURCE_FOLDER_PROJECT}"
 #
 git clone "https://github.com/cisco/libacvp.git"
+
+
 cd "libacvp"
+
+## Convert new-line symbol to Unix format
+find . -type f -print0 | xargs -0 dos2unix
+
 ##
 # Adding debug build ( CFLAGS="-O0 -g" ./configure )
 CFLAGS="-O0 -g" ./configure --with-ssl-dir="$OPENSSL_INSTALL" --with-libcurl-dir="$CURL_INSTALL" --prefix="${LIBACVP_INSTALL_FOLDER}" && make && make install
