@@ -104,13 +104,15 @@ mkdir "${CRITERION_INSTALL_FOLDER}"
 
 cd "${CRITERION_NAME}"
 
-# Install "meson" and "ninja" build system.0
+# Install "meson" and "ninja" build system.
 
 echo "Criterion folder:  $(pwd)"
 
-python3 -m venv env
+VENV="CriterionBuildTool_VirtualEnvironment"
 
-. env/bin/activate
+python3 -m venv ${VENV}
+
+. ${VENV}/bin/activate
 
 # Updating pip
 #pip3 install -U pip
@@ -120,6 +122,14 @@ pip3 install meson
 
 # python3 -m pip install ninja
 pip3 install ninja
+
+# Archive all python package from Virtual Environment
+# ////////////////////////////////////////////////////////////
+
+tar -czvf ${VENV}.tar.gz "${VENV}"
+mv -f ${VENV}.tar.gz "${ARCHIVE_FOLDER_PROJECT}"
+
+# ////////////////////////////////////////////////////////////
 
 meson build -Dprefix=${CRITERION_INSTALL_FOLDER}
 
@@ -153,10 +163,13 @@ echo "libacvp folder:  $(pwd)"
 cd "test"
 
 # Build libasvp Tests with Criterion
+
 make clean
+
 INCLUDES="-I${CRITERION_INSTALL_FOLDER}/include" make
 
 chmod a+x runtest
+
 ./runtest --verbose
 
 # Remove all output test files (sandbox-gmon.[0-9]*)
