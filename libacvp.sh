@@ -56,12 +56,11 @@ export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${CURL_INSTALL}/lib"
 
 ########################################################################
 
-##
-cd "${SOURCE_FOLDER_PROJECT}"
-##
 
 # libacvp Project
-########################################################################
+#######################################################################
+
+cd "${SOURCE_FOLDER_PROJECT}"
 
 LIB_ACVP_NAME="libacvp"
 LIBACVP_INSTALL_FOLDER="${INSTALL_FOLDER_PROJECT}/${LIB_ACVP_NAME}_install"
@@ -76,7 +75,7 @@ mv -f ${LIB_ACVP_NAME}.tar.gz "${ARCHIVE_FOLDER_PROJECT}"
 cd "${LIB_ACVP_NAME}"
 
 # Convert new-line symbol to Unix format
-find . -type f -print0 | xargs -0 dos2unix
+# find . -type f -print0 | xargs -0 dos2unix
 
 # Make file configure executable.
 chmod a+x configure
@@ -84,17 +83,93 @@ chmod a+x configure
 # Adding debug build ( CFLAGS="-O0 -g" ./configure )
 CFLAGS="-O0 -g" ./configure --with-ssl-dir="$OPENSSL_INSTALL" --with-libcurl-dir="$CURL_INSTALL" --prefix="${LIBACVP_INSTALL_FOLDER}" && make && make install
 
+export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${LIBACVP_INSTALL_FOLDER}/lib"
 ########################################################################
+
+# Criterion Project - test framework for libacvp
+########################################################################
+
+cd "${SOURCE_FOLDER_PROJECT}"
+
+CRITERION_NAME="Criterion"
+
+git clone --recursive "https://github.com/Snaipe/Criterion.git"
+
+tar -czvf ${CRITERION_NAME}.tar.gz "${CRITERION_NAME}"
+mv -f ${CRITERION_NAME}.tar.gz "${ARCHIVE_FOLDER_PROJECT}"
+
+CRITERION_INSTALL_FOLDER="${INSTALL_FOLDER_PROJECT}/${CRITERION_NAME}_install"
+
+mkdir "${CRITERION_INSTALL_FOLDER}"
+
+cd "${CRITERION_NAME}"
+
+# Install "meson" and "ninja" build system.0
+
+echo "Criterion folder:  $(pwd)"
+
+python3 -m venv env
+
+. env/bin/activate
+
+# Updating pip
+#pip3 install -U pip
+
+# python3 -m pip install meson
+pip3 install meson
+
+# python3 -m pip install ninja
+pip3 install ninja
+
+meson build -Dprefix=${CRITERION_INSTALL_FOLDER}
+
+# ninja -C build
+# With Debug
+ninja -d explain -C build
+
+ninja -C build install
+
+# Testing
+ninja -C build test
+
+deactivate
+
+export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${CRITERION_INSTALL_FOLDER}/lib"
+
+# Linax install Criterium from apt
+
+# sudo add-apt-repository ppa:snaipewastaken/ppa
+# sudo apt-get update
+# sudo apt-get install criterion-dev
+
+########################################################################
+
+# libacvp run test and help
+########################################################################
+
+cd "${SOURCE_FOLDER_PROJECT}/${LIB_ACVP_NAME}"
+echo "libacvp folder:  $(pwd)"
+
+cd "test"
+
+# Build libasvp Tests with Criterion
+make clean
+INCLUDES="-I${CRITERION_INSTALL_FOLDER}/include" make
+
+chmod a+x runtest
+./runtest --verbose
+
+# Remove all output test files (sandbox-gmon.[0-9]*)
+find . -type f | grep -P ".*sandbox-gmon[.][0-9]*" | xargs rm
 
 # Sample for executing
 
-# export ACV_SERVER="demo.acvts.nist.gov"
-# export ACV_PORT="443"
-# export ACV_URI_PREFIX="acvp/v1/"
-# export ACV_API_CONTEXT="acvp/"
-# #
-# cd "${LIBACVP_INSTALL_FOLDER}"
-# #./app/acvp_app --help
-# #./app/acvp_app --all_algs
-#
+export ACV_SERVER="demo.acvts.nist.gov"
+export ACV_PORT="443"
+export ACV_URI_PREFIX="acvp/v1/"
+export ACV_API_CONTEXT="acvp/"
+export ACV_TOTP_SEED "1234567890"
+
+cd "${LIBACVP_INSTALL_FOLDER}"
+./bin/acvp_app --help
 # ./bin/acvp_app --all_algs
