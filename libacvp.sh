@@ -18,11 +18,20 @@ INSTALL_FOLDER_PROJECT="${ACVP_PROJECT_FOLDER}/${INSTALL_FOLDER_NAME}"
 SOURCE_FOLDER_PROJECT="${ACVP_PROJECT_FOLDER}/${SOURCE_FOLDER_NAME}"
 ARCHIVE_FOLDER_PROJECT="${ACVP_PROJECT_FOLDER}/${ARCHIVE_FOLDER_NAME}"
 
+OPENSSL_INSTALL_FOLDER="${INSTALL_FOLDER_PROJECT}/openssl-1.1.1b_install"
+export OPENSSL_INSTALL="${OPENSSL_INSTALL_FOLDER}"
+
+CURL_INSTALL_FOLDER="${INSTALL_FOLDER_PROJECT}/curl-7.64.1_install"
+export CURL_INSTALL="${CURL_INSTALL_FOLDER}"
+
+LIB_ACVP_NAME="libacvp"
+LIBACVP_INSTALL_FOLDER="${INSTALL_FOLDER_PROJECT}/${LIB_ACVP_NAME}_install"
+
+CRITERION_NAME="Criterion"
+CRITERION_INSTALL_FOLDER="${INSTALL_FOLDER_PROJECT}/${CRITERION_NAME}_install"
 
 # OpenSSL project
 ########################################################################
-
-OPENSSL_INSTALL_FOLDER="${INSTALL_FOLDER_PROJECT}/openssl-1.1.1b_install"
 
 # wget https://www.openssl.org/source/openssl-1.1.1b.tar.gz && tar -xf openssl-1.1.1b.tar.gz -C "${SOURCE_FOLDER_PROJECT}"
 
@@ -30,7 +39,6 @@ OPENSSL_INSTALL_FOLDER="${INSTALL_FOLDER_PROJECT}/openssl-1.1.1b_install"
 wget --no-check-certificate https://www.openssl.org/source/openssl-1.1.1b.tar.gz && tar -xf openssl-1.1.1b.tar.gz -C "${SOURCE_FOLDER_PROJECT}"
 mv -f openssl-1.1.1b.tar.gz "${ARCHIVE_FOLDER_PROJECT}"
 
-export OPENSSL_INSTALL="${OPENSSL_INSTALL_FOLDER}"
 # Adding debug build ( ./config -d )
 cd "${SOURCE_FOLDER_PROJECT}/openssl-1.1.1b" && ./config shared -d --prefix="${OPENSSL_INSTALL}" && make clean && make && make install
 export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${OPENSSL_INSTALL}/lib"
@@ -40,8 +48,6 @@ export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${OPENSSL_INSTALL}/lib"
 # Curl project
 ########################################################################
 
-CURL_INSTALL_FOLDER="${INSTALL_FOLDER_PROJECT}/curl-7.64.1_install"
-export CURL_INSTALL="${CURL_INSTALL_FOLDER}"
 # wget https://curl.haxx.se/download/curl-7.64.1.tar.gz && tar -xf curl-7.64.1.tar.gz -C "${SOURCE_FOLDER_PROJECT}"
 
 # --no-check-certificate
@@ -61,9 +67,6 @@ export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${CURL_INSTALL}/lib"
 #######################################################################
 
 cd "${SOURCE_FOLDER_PROJECT}"
-
-LIB_ACVP_NAME="libacvp"
-LIBACVP_INSTALL_FOLDER="${INSTALL_FOLDER_PROJECT}/${LIB_ACVP_NAME}_install"
 
 # Clone repository libacvp
 git clone "https://github.com/cisco/${LIB_ACVP_NAME}.git"
@@ -91,14 +94,10 @@ export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${LIBACVP_INSTALL_FOLDER}/lib"
 
 cd "${SOURCE_FOLDER_PROJECT}"
 
-CRITERION_NAME="Criterion"
-
 git clone --recursive "https://github.com/Snaipe/Criterion.git"
 
 tar -czvf ${CRITERION_NAME}.tar.gz "${CRITERION_NAME}"
 mv -f ${CRITERION_NAME}.tar.gz "${ARCHIVE_FOLDER_PROJECT}"
-
-CRITERION_INSTALL_FOLDER="${INSTALL_FOLDER_PROJECT}/${CRITERION_NAME}_install"
 
 mkdir "${CRITERION_INSTALL_FOLDER}"
 
@@ -181,7 +180,7 @@ export ACV_SERVER="demo.acvts.nist.gov"
 export ACV_PORT="443"
 export ACV_URI_PREFIX="acvp/v1/"
 export ACV_API_CONTEXT="acvp/"
-export ACV_TOTP_SEED "1234567890"
+export ACV_TOTP_SEED="1234567890"
 
 cd "${LIBACVP_INSTALL_FOLDER}"
 ./bin/acvp_app --help
