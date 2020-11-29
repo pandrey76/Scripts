@@ -163,6 +163,14 @@ cd "test"
 
 # Build libasvp Tests with Criterion
 
+# Export variables from file test_env.sh, for building libacvp tests.
+export OPENSSL_DIR=${OPENSSL_INSTALL_FOLDER}
+export CURL_DIR=${CURL_INSTALL_FOLDER}
+export ACVP_DIR=${LIBACVP_INSTALL_FOLDER}
+export CRITERION_DIR=${CRITERION_INSTALL_FOLDER}
+export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${OPENSSL_DIR}/lib:${CURL_DIR}/lib:${ACVP_DIR}/lib:${CRITERION_DIR}/lib"
+
+
 make clean
 
 INCLUDES="-I${CRITERION_INSTALL_FOLDER}/include" make
