@@ -86,6 +86,9 @@ chmod a+x configure
 # Adding debug build ( CFLAGS="-O0 -g" ./configure )
 CFLAGS="-O0 -g" ./configure --with-ssl-dir="$OPENSSL_INSTALL" --with-libcurl-dir="$CURL_INSTALL" --prefix="${LIBACVP_INSTALL_FOLDER}" && make && make install
 
+# Build with Criterion
+# CFLAGS="-O0 -g" ./configure --with-ssl-dir="$OPENSSL_INSTALL" --with-libcurl-dir="$CURL_INSTALL" --prefix="${LIBACVP_INSTALL_FOLDER}" --with-criterion-dir="${CRITERION_INSTALL_FOLDER}" && make && make install
+
 export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${LIBACVP_INSTALL_FOLDER}/lib"
 ########################################################################
 
