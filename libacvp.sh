@@ -83,6 +83,15 @@ find . -type f -print0 | xargs -0 dos2unix
 #  or
 sed -i -e 's/\r$//' configure
 
+# Support only http protocol
+#######################################################################
+
+cd "src"
+sed -i 's!https://%s!http:\\%s!' acvp_transport.c
+cd "${SOURCE_FOLDER_PROJECT}/${LIB_ACVP_NAME}"
+
+#######################################################################
+
 # Make file configure executable.
 chmod a+x configure
 
