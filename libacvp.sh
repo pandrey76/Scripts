@@ -71,6 +71,7 @@ cd "${SOURCE_FOLDER_PROJECT}"
 # Clone repository libacvp
 git clone "https://github.com/cisco/${LIB_ACVP_NAME}.git"
 
+# Version of libacvp package can see in file: libacvp/acvp_config.h (#define PACKAGE_VERSION "1.1.0")
 # Archive libacvp source project
 tar -czvf ${LIB_ACVP_NAME}.tar.gz "${LIB_ACVP_NAME}"
 mv -f ${LIB_ACVP_NAME}.tar.gz "${ARCHIVE_FOLDER_PROJECT}"
@@ -78,7 +79,9 @@ mv -f ${LIB_ACVP_NAME}.tar.gz "${ARCHIVE_FOLDER_PROJECT}"
 cd "${LIB_ACVP_NAME}"
 
 # Convert new-line symbol to Unix format
-# find . -type f -print0 | xargs -0 dos2unix
+find . -type f -print0 | xargs -0 dos2unix
+#  or
+sed -i -e 's/\r$//' configure
 
 # Make file configure executable.
 chmod a+x configure
@@ -171,12 +174,14 @@ export OPENSSL_DIR=${OPENSSL_INSTALL_FOLDER}
 export CURL_DIR=${CURL_INSTALL_FOLDER}
 export ACVP_DIR=${LIBACVP_INSTALL_FOLDER}
 export CRITERION_DIR=${CRITERION_INSTALL_FOLDER}
-export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${OPENSSL_DIR}/lib:${CURL_DIR}/lib:${ACVP_DIR}/lib:${CRITERION_DIR}/lib"
+export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${OPENSSL_DIR}/lib:${CURL_DIR}/lib:${ACVP_DIR}/lib:${CRITERION_DIR}/lib/x86_64-linux-gnu"
 
 
 make clean
 
 INCLUDES="-I${CRITERION_INSTALL_FOLDER}/include" make
+# Not work yet
+# CRITERION_CFLAGS="-I${CRITERION_INSTALL_FOLDER}/include" CRITERION_LDFLAGS="-L${CRITERION_INSTALL_FOLDER}/lib/x86_64-linux-gnu -lcriterion" make
 
 chmod a+x runtest
 
