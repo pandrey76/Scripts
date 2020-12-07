@@ -99,7 +99,7 @@ sed -i -e 's/\r$//' configure
 #######################################################################
 
 cd "src"
-sed -i 's!https://%s!http:\\%s!' acvp_transport.c
+sed -i 's!https://%s!http://%s!' acvp_transport.c
 cd "${SOURCE_FOLDER_PROJECT}/${LIB_ACVP_NAME}"
 
 #######################################################################
