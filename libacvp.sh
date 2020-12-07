@@ -1,5 +1,17 @@
 #!/bin/bash
 
+function get_criterion_lib_folder_name() {
+
+  local ARCHITECTURE="$(uname -m)"      #x86_64
+  local OPERATING_SYSTEM="$(uname -o)"  #GNU/Linux
+
+  # Move to lowercase (${OPERATING_SYSTEM,,}) and change '/' to '-'
+  # OPERATING_SYSTEM=$(echo "${OPERATING_SYSTEM,,}" | sed 's|/|-|')   # gnu-linux
+  OPERATING_SYSTEM=$(echo "${OPERATING_SYSTEM,,}" | sed -r 's|(.*)/(.*)|\2-\1|')   # linux-gnu
+
+  echo "${ARCHITECTURE}-${OPERATING_SYSTEM}"
+}
+
 ACVP_PROJECT_FOLDER_NAME="ACVP_PROJECT"
 INSTALL_FOLDER_NAME="INSTALLATION"
 SOURCE_FOLDER_NAME="SOURCE"
@@ -175,22 +187,37 @@ cd "${SOURCE_FOLDER_PROJECT}/${LIB_ACVP_NAME}"
 echo "libacvp folder:  $(pwd)"
 
 cd "test"
+echo "Current folder: $(pwd)"
 
 # Build libasvp Tests with Criterion
+# ////////////////////////////////////////////////////////////////////////
 
 # Export variables from file test_env.sh, for building libacvp tests.
 export OPENSSL_DIR=${OPENSSL_INSTALL_FOLDER}
 export CURL_DIR=${CURL_INSTALL_FOLDER}
 export ACVP_DIR=${LIBACVP_INSTALL_FOLDER}
 export CRITERION_DIR=${CRITERION_INSTALL_FOLDER}
-export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${OPENSSL_DIR}/lib:${CURL_DIR}/lib:${ACVP_DIR}/lib:${CRITERION_DIR}/lib/x86_64-linux-gnu"
 
+CRITERION_INSTALLATION_LAST_LIB_NAME=$(get_criterion_lib_folder_name)   # x86_64-linux-gnu
+export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${OPENSSL_DIR}/lib:${CURL_DIR}/lib:${ACVP_DIR}/lib:${CRITERION_DIR}/lib/${CRITERION_INSTALLATION_LAST_LIB_NAME}"
+#export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${OPENSSL_DIR}/lib:${CURL_DIR}/lib:${ACVP_DIR}/lib:${CRITERION_DIR}/lib/$(get_criterion_lib_folder_name)"
+
+# Modification Makefile for test build by Critrion framework
+# ////////////////////////////////////////////////////////////////////////
+
+SED_PARAM_FOR_INCLUDES="s|\W*CRITERION_CFLAGS\W*=\W*-I/include\W*$|CRITERION_CFLAGS = -I$CRITERION_INSTALL_FOLDER/include|"
+sed -i "${SED_PARAM_FOR_INCLUDES}" Makefile
+
+SED_PARAM_FOR_LD="s|^\W*CRITERION_LDFLAGS\W*=\W*-L/lib\W*-lcriterion\W*$|CRITERION_LDFLAGS = -L$CRITERION_INSTALL_FOLDER/lib/$CRITERION_INSTALLATION_LAST_LIB_NAME -lcriterion|"
+sed -i "${SED_PARAM_FOR_LD}" Makefile
+
+# ////////////////////////////////////////////////////////////////////////
 
 make clean
 
-INCLUDES="-I${CRITERION_INSTALL_FOLDER}/include" make
-# Not work yet
-# CRITERION_CFLAGS="-I${CRITERION_INSTALL_FOLDER}/include" CRITERION_LDFLAGS="-L${CRITERION_INSTALL_FOLDER}/lib/x86_64-linux-gnu -lcriterion" make
+# Work for compiling, but upper code (modification of Makefile) work more correctly.
+# INCLUDES="-I${CRITERION_INSTALL_FOLDER}/include" make
+make
 
 chmod a+x runtest
 
