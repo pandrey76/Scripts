@@ -1,4 +1,3 @@
-#!/bin/bash
 
 function get_criterion_lib_folder_name() {
 
