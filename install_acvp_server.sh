@@ -54,27 +54,28 @@ git clone "/media/${CURRENT_USER}/9269-8EE1/local_git_reprs/${CURRENT_REPOSITORY
 if [ -d "${CRYPTOGRAPHY_VERIFICATION_SERVER_FOLDER}" ]
     then
         echo "The project ${CURRENT_REPOSITORY_NAME} is correctly cloning from git repository."
+        echo "Path to project ${CURRENT_REPOSITORY_NAME} folder: ${CRYPTOGRAPHY_VERIFICATION_SERVER_FOLDER}"
 else
         echo "Error! The project ${CURRENT_REPOSITORY_NAME} is not cloning from git repository!"
         exit 0
 fi
 
-INSTALLATION_SCRIPT="installation.sh"
-PATH_TO_INSTALLATION_SCRIPT= "${CRYPTOGRAPHY_VERIFICATION_SERVER_FOLDER}/${INSTALLATION_SCRIPT}"
-echo "Path to installation.sh path: ${PATH_TO_INSTALLATION_SCRIPT}"
+PATH_TO_ACVP_INTERNAL_CLIENT_RUN_SCRIPT="${CRYPTOGRAPHY_VERIFICATION_SERVER_FOLDER}/acvp-client/run-acvp-client.sh"
+echo "Path to script file that run etalone client realization: ${PATH_TO_ACVP_INTERNAL_CLIENT_RUN_SCRIPT}"
+echo "Change end line symbols in file: dos2unix ${PATH_TO_ACVP_INTERNAL_CLIENT_RUN_SCRIPT}"
+# cat "${PATH_TO_ACVP_INTERNAL_CLIENT_RUN_SCRIPT}"
+dos2unix "${PATH_TO_INSTALLATION_SCRIPT}"
+
+
+INSTALLATION_SCRIPT_FILE_NAME="installation.sh"
+PATH_TO_INSTALLATION_SCRIPT="${CRYPTOGRAPHY_VERIFICATION_SERVER_FOLDER}/${INSTALLATION_SCRIPT_FILE_NAME}"
+echo "Path to file installation.sh path: ${PATH_TO_INSTALLATION_SCRIPT}"
+
+echo "Change end line symbols in file: dos2unix ${PATH_TO_INSTALLATION_SCRIPT}"
+dos2unix "${PATH_TO_INSTALLATION_SCRIPT}"
 
 echo "Make file executable: chmod a+x ${PATH_TO_INSTALLATION_SCRIPT}"
 chmod a+x "${PATH_TO_INSTALLATION_SCRIPT}"
-
-echo "Change end line symbols in file: dos2unix ${PATH_TO_INSTALLATION_SCRIPT}./CryptographyVerificationServer/installation.sh"
-dos2unix "${PATH_TO_INSTALLATION_SCRIPT}"
-
-# if [ -z "$2" ]
-#   then
-#     PATH_TO_INSTALLATION_SCRIPT="./CryptographyVerificationServer/installation.sh"
-# else
-#     PATH_TO_INSTALLATION_SCRIPT="$2"
-# fi
 
 PATH_TO_PYTHON=""
 if [ -z "$2" ]
@@ -95,5 +96,4 @@ fi
 echo "Full path to internal client realization: ${PATH_TO_ACVP_INTERNAL_CLIENT_REALIZATION}"
 
 echo "Run script with params: bash ${PATH_TO_INSTALLATION_SCRIPT} ${PATH_TO_PYTHON} ${PATH_TO_ACVP_INTERNAL_CLIENT_REALIZATION}"
-CURRENT_USER=""
 bash "${PATH_TO_INSTALLATION_SCRIPT}" "${PATH_TO_PYTHON}" "${PATH_TO_ACVP_INTERNAL_CLIENT_REALIZATION}"
