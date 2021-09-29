@@ -86,3 +86,14 @@ function build_gost_engine()    {
 build_gost_engine "$1" "$2" "$3"
 
 # bash ./building_gost_engine.sh "/home/admin1/acvp/OpenSSL/OpenSSL_2021.09.27/gost-engine/TAR/engine-master_27.09.2021.tar.gz" "/home/admin1/acvp/Stend1" "/home/admin1/cmake-3.21.3"
+build cmake
+
+# ///////////////////////////////////////////////////
+# Build and install cmake
+# Unpacking archive:
+# tar xvf "cmake-3.21.3.tar.gz" -C "${PATH_TO_OUTPUT}"
+# cd "${PATH_TO_OUTPUT}/cmake-3.21.3"
+# ./bootstrap
+# make
+# make install
+# ///////////////////////////////////////////////////

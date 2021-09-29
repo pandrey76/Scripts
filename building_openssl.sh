@@ -60,14 +60,27 @@ function build_and_install_debug_shared_openssl() {
    tar xvf "${PATH_TO_ARCHIVE_FILE}" -C "${PATH_TO_OUTPUT}"
    cd "${PATH_TO_OUTPUT}"
    echo "Current folder: $(pwd)"
-   OPENSSL_SOURCE_FOLDER_PATH="$(find $(pwd) -type d -name openssl*)"
+   OPENSSL_SOURCE_FOLDER_PATH="$(find $(pwd) -type d -name openssl* -print -quit)"
    echo "Full path to openssl folder: ${OPENSSL_SOURCE_FOLDER_PATH}"
    cd "${OPENSSL_SOURCE_FOLDER_PATH}"
-   sed -i -e 's/\r$//' ./config
+   echo "Current OpenSSL source folder: $(pwd)"
+   # dos2unix ./Configure
+
+#    if [ -z "$3" ]
+#      then
+#        echo "Don't executing dos2unix utilities for config file"
+#    else
+#        echo "Transforming config file to unix format"
+#        sed -i -e 's/\r$//' ./config
+#    fi
    ./config shared -d --prefix=${PATH_TO_OUTPUT}/Install/
    make
    make test
    make install
 }
 
-build_and_install_debug_shared_openssl "/home/admin1/acvp/OpenSSL/OpenSSL_v.1.0.2s/openssl-1.0.2s.tar.gz" "/home/admin1/acvp/Stend/"
+build_and_install_debug_shared_openssl "$1" "$2"
+
+# "/home/admin1/acvp/OpenSSL/OpenSSL_v.1.0.2s/openssl-1.0.2s.tar.gz" "/home/admin1/acvp/Stend/"
+# bash ./building_openssl.sh "/home/admin1/acvp/OpenSSL/OpenSSL_v.1.0.2s/openssl-1.0.2s.tar.gz" "/home/admin1/acvp/Stend/" "True"
+# bash ./building_openssl.sh "/home/admin1/acvp/OpenSSL/OpenSSL_2021.09.27/openssl/TAR/openssl-master_27.09.2021.tar.gz" "/home/admin1/acvp/Stend1/"
