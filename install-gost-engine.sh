@@ -51,3 +51,32 @@ export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${OPENSSL_INSTALL}/lib"
 
 
 ########################################################################
+
+# cmake project
+########################################################################
+
+CMAKE_LATEST_RELEASE_URL="https://cmake.org/files/LatestRelease/"
+CMAKE_LATEST_RELEASE_HTML=$(curl -s ${CMAKE_LATEST_RELEASE_URL})
+[[ ${CMAKE_LATEST_RELEASE_HTML} =~ .*cmake-([0-9][.][0-9][0-9][.][0-9])-SHA-256[.]txt.* ]] && CMAKE_LATEST_RELEASE_VERSION="${BASH_REMATCH[1]}"
+
+if [ -z ${CMAKE_LATEST_RELEASE_HTML} ]
+then
+    echo "Can't check for latest version of cmake"
+else
+    echo "Last stable release of cmake is ${CMAKE_LATEST_RELEASE_VERSION}"
+fi
+CMAKE_LATEST_RELEASE_NAME="cmake-${CMAKE_LATEST_RELEASE_VERSION}"
+
+CMAKE_LATEST_RELEASE_TARGZ_FILE_NAME="${CMAKE_LATEST_RELEASE_NAME}.tar.gz"
+CMAKE_LATEST_RELEASE_TARGZ_FILE_URL="${CMAKE_LATEST_RELEASE_URL}${CMAKE_LATEST_RELEASE_TARGZ_FILE_NAME}"
+wget --no-check-certificate "${CMAKE_LATEST_RELEASE_TARGZ_FILE_URL}"
+tar -xf "./${CMAKE_LATEST_RELEASE_TARGZ_FILE_NAME}" -C "${SOURCE_FOLDER_PROJECT}"
+mv -f "./${CMAKE_LATEST_RELEASE_TARGZ_FILE_NAME}" "${ARCHIVE_FOLDER_PROJECT}"
+
+CMAKE_LATEST_RELEASE_SHA256_FILE_NAME="${CMAKE_LATEST_RELEASE_NAME}-SHA-256.txt"
+CMAKE_LATEST_RELEASE_SHA256_FILE_URL="${CMAKE_LATEST_RELEASE_URL}${CMAKE_LATEST_RELEASE_SHA256_FILE_NAME}"
+wget --no-check-certificate "${CMAKE_LATEST_RELEASE_SHA256_FILE_URL}"
+mv -f "./${CMAKE_LATEST_RELEASE_SHA256_FILE_NAME}" "${ARCHIVE_FOLDER_PROJECT}"
+# echo ${CMAKE_LATEST_RELEASE_HTML}
+# echo ${CMAKE_LATEST_RELEASE_VERSION}
+########################################################################
