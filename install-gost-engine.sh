@@ -18,7 +18,6 @@ function is_correct_sha256() {
     local CURRENT_CRC_LINE=$(sha256sum "${PATH_TO_SOURCE_FILE}")
     echo "Output from sha256sum work: ${CURRENT_CRC_LINE}"
     
-    # read -a strarr <<< "Şstring"
     IFS=' ' read -r CURRENT_CRC CURRENT_FILE <<< ${CURRENT_CRC_LINE}
     printf 'Current CRC: %s    Current file: %s\n' "${CURRENT_CRC}" "${CURRENT_FILE}"
 
@@ -82,7 +81,7 @@ ARCHIVE_FOLDER_PROJECT="${PROJECT_FOLDER}/${ARCHIVE_FOLDER_NAME}"
 ########################################################################
 #OPENSSL_VERSION="3.0.3"
 #
-#OPENSSL_INSTALL_FOLDER="${INSTALL_FOLDER_PROJECT}/openssl-${OPENSSL_VERSION}-install"
+#OPENSSL_INSTALL_FOLDER="${INSTALL_FOLDER_PROJECT}/openssl-${OPENSSL_VERSION}"
 #export OPENSSL_INSTALL="${OPENSSL_INSTALL_FOLDER}"
 #
 #
@@ -126,12 +125,29 @@ if [[ $? -eq 1 ]]
    echo "The file '${CMAKE_LATEST_RELEASE_TARGZ_FILE_NAME}' don't match to CRC."
 fi
 
+tar -xf "./${CMAKE_LATEST_RELEASE_TARGZ_FILE_NAME}" -C "${SOURCE_FOLDER_PROJECT}"
+mv -f "./${CMAKE_LATEST_RELEASE_TARGZ_FILE_NAME}" "${ARCHIVE_FOLDER_PROJECT}"
+mv -f "./${CMAKE_LATEST_RELEASE_SHA256_FILE_NAME}" "${ARCHIVE_FOLDER_PROJECT}"
 
-# tar -xf "./${CMAKE_LATEST_RELEASE_TARGZ_FILE_NAME}" -C "${SOURCE_FOLDER_PROJECT}"
-# mv -f "./${CMAKE_LATEST_RELEASE_TARGZ_FILE_NAME}" "${ARCHIVE_FOLDER_PROJECT}"
+# Building cmake project
+# **********************************************************************
 
-# mv -f "./${CMAKE_LATEST_RELEASE_SHA256_FILE_NAME}" "${ARCHIVE_FOLDER_PROJECT}"
+CMAKE_LATEST_RELEASE_INSTALLATION_FOLDER="${INSTALL_FOLDER_PROJECT}/${CMAKE_LATEST_RELEASE_NAME}"
+printf 'Full path to cmake installation folder: %s' "${CMAKE_LATEST_RELEASE_INSTALLATION_FOLDER}"
 
+CMAKE_LATEST_RELEASE_SOURCE_FOLDER="${SOURCE_FOLDER_PROJECT}/${CMAKE_LATEST_RELEASE_NAME}"
+printf 'Full path to cmake source folder: %s' "${CMAKE_LATEST_RELEASE_SOURCE_FOLDER}"
+cd "${CMAKE_LATEST_RELEASE_SOURCE_FOLDER}"
+
+./bootstrap --prefix="${CMAKE_LATEST_RELEASE_INSTALLATION_FOLDER}/"
+make
+make install
+
+# **********************************************************************
 # echo ${CMAKE_LATEST_RELEASE_HTML}
 # echo ${CMAKE_LATEST_RELEASE_VERSION}
+########################################################################
+
+#
+########################################################################
 ########################################################################
