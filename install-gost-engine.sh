@@ -62,14 +62,18 @@ echo "Current script folder: ${CURRENT_SCRIPT_FOLDER}"
 
 # BASE_FOLDER=$(pwd)
 
-mkdir "./${PROJECT_FOLDER_NAME}"
-cd "./${PROJECT_FOLDER_NAME}"
+#mkdir "./${PROJECT_FOLDER_NAME}"
+#cd "./${PROJECT_FOLDER_NAME}"
 
 PROJECT_FOLDER="${CURRENT_SCRIPT_FOLDER}/${PROJECT_FOLDER_NAME}"
+echo "Current project folder: ${PROJECT_FOLDER}"
 
-mkdir "${INSTALL_FOLDER_NAME}"
-mkdir "${SOURCE_FOLDER_NAME}"
-mkdir "${ARCHIVE_FOLDER_NAME}"
+mkdir -p "${PROJECT_FOLDER}"
+cd "${PROJECT_FOLDER}"
+
+mkdir -p "${INSTALL_FOLDER_NAME}"
+mkdir -p "${SOURCE_FOLDER_NAME}"
+mkdir -p "${ARCHIVE_FOLDER_NAME}"
 
 INSTALL_FOLDER_PROJECT="${PROJECT_FOLDER}/${INSTALL_FOLDER_NAME}"
 SOURCE_FOLDER_PROJECT="${PROJECT_FOLDER}/${SOURCE_FOLDER_NAME}"
@@ -99,55 +103,73 @@ ARCHIVE_FOLDER_PROJECT="${PROJECT_FOLDER}/${ARCHIVE_FOLDER_NAME}"
 # cmake project
 ########################################################################
 
-CMAKE_LATEST_RELEASE_URL="https://cmake.org/files/LatestRelease/"
-CMAKE_LATEST_RELEASE_HTML=$(curl -s ${CMAKE_LATEST_RELEASE_URL})
-[[ ${CMAKE_LATEST_RELEASE_HTML} =~ .*cmake-([0-9][.][0-9][0-9][.][0-9])-SHA-256[.]txt.* ]] && CMAKE_LATEST_RELEASE_VERSION="${BASH_REMATCH[1]}"
-
-if [[ -z ${CMAKE_LATEST_RELEASE_HTML} ]]
-then
-    echo "Can't check for latest version of cmake"
-else
-    echo "Last stable release of cmake is ${CMAKE_LATEST_RELEASE_VERSION}"
-fi
-CMAKE_LATEST_RELEASE_NAME="cmake-${CMAKE_LATEST_RELEASE_VERSION}"
-
-CMAKE_LATEST_RELEASE_TARGZ_FILE_NAME="${CMAKE_LATEST_RELEASE_NAME}.tar.gz"
-CMAKE_LATEST_RELEASE_TARGZ_FILE_URL="${CMAKE_LATEST_RELEASE_URL}${CMAKE_LATEST_RELEASE_TARGZ_FILE_NAME}"
-# wget --no-check-certificate "${CMAKE_LATEST_RELEASE_TARGZ_FILE_URL}"
-
-CMAKE_LATEST_RELEASE_SHA256_FILE_NAME="${CMAKE_LATEST_RELEASE_NAME}-SHA-256.txt"
-CMAKE_LATEST_RELEASE_SHA256_FILE_URL="${CMAKE_LATEST_RELEASE_URL}${CMAKE_LATEST_RELEASE_SHA256_FILE_NAME}"
-# wget --no-check-certificate "${CMAKE_LATEST_RELEASE_SHA256_FILE_URL}"
-
-is_correct_sha256 "./${CMAKE_LATEST_RELEASE_TARGZ_FILE_NAME}" "./${CMAKE_LATEST_RELEASE_SHA256_FILE_NAME}"
-if [[ $? -eq 1 ]]
-  then
-   echo "The file '${CMAKE_LATEST_RELEASE_TARGZ_FILE_NAME}' don't match to CRC."
-fi
-
-tar -xf "./${CMAKE_LATEST_RELEASE_TARGZ_FILE_NAME}" -C "${SOURCE_FOLDER_PROJECT}"
-mv -f "./${CMAKE_LATEST_RELEASE_TARGZ_FILE_NAME}" "${ARCHIVE_FOLDER_PROJECT}"
-mv -f "./${CMAKE_LATEST_RELEASE_SHA256_FILE_NAME}" "${ARCHIVE_FOLDER_PROJECT}"
-
-# Building cmake project
-# **********************************************************************
-
-CMAKE_LATEST_RELEASE_INSTALLATION_FOLDER="${INSTALL_FOLDER_PROJECT}/${CMAKE_LATEST_RELEASE_NAME}"
-printf 'Full path to cmake installation folder: %s' "${CMAKE_LATEST_RELEASE_INSTALLATION_FOLDER}"
-
-CMAKE_LATEST_RELEASE_SOURCE_FOLDER="${SOURCE_FOLDER_PROJECT}/${CMAKE_LATEST_RELEASE_NAME}"
-printf 'Full path to cmake source folder: %s' "${CMAKE_LATEST_RELEASE_SOURCE_FOLDER}"
-cd "${CMAKE_LATEST_RELEASE_SOURCE_FOLDER}"
-
-./bootstrap --prefix="${CMAKE_LATEST_RELEASE_INSTALLATION_FOLDER}/"
-make
-make install
-
+## CMAKE_LATEST_RELEASE_URL="https://cmake.org/files/LatestRelease/"
+## CMAKE_LATEST_RELEASE_HTML=$(curl -s ${CMAKE_LATEST_RELEASE_URL})
+## [[ ${CMAKE_LATEST_RELEASE_HTML} =~ .*cmake-([0-9][.][0-9][0-9][.][0-9])-SHA-256[.]txt.* ]] && CMAKE_LATEST_RELEASE_VERSION="${BASH_REMATCH[1]}"
+##
+## if [[ -z ${CMAKE_LATEST_RELEASE_HTML} ]]
+## then
+##     echo "Can't check for latest version of cmake"
+## else
+##     echo "Last stable release of cmake is ${CMAKE_LATEST_RELEASE_VERSION}"
+## fi
+## CMAKE_LATEST_RELEASE_NAME="cmake-${CMAKE_LATEST_RELEASE_VERSION}"
+##
+## CMAKE_LATEST_RELEASE_TARGZ_FILE_NAME="${CMAKE_LATEST_RELEASE_NAME}.tar.gz"
+## CMAKE_LATEST_RELEASE_TARGZ_FILE_URL="${CMAKE_LATEST_RELEASE_URL}${CMAKE_LATEST_RELEASE_TARGZ_FILE_NAME}"
+## # wget --no-check-certificate "${CMAKE_LATEST_RELEASE_TARGZ_FILE_URL}"
+##
+## CMAKE_LATEST_RELEASE_SHA256_FILE_NAME="${CMAKE_LATEST_RELEASE_NAME}-SHA-256.txt"
+## CMAKE_LATEST_RELEASE_SHA256_FILE_URL="${CMAKE_LATEST_RELEASE_URL}${CMAKE_LATEST_RELEASE_SHA256_FILE_NAME}"
+## # wget --no-check-certificate "${CMAKE_LATEST_RELEASE_SHA256_FILE_URL}"
+##
+## is_correct_sha256 "./${CMAKE_LATEST_RELEASE_TARGZ_FILE_NAME}" "./${CMAKE_LATEST_RELEASE_SHA256_FILE_NAME}"
+## if [[ $? -eq 1 ]]
+##   then
+##    echo "The file '${CMAKE_LATEST_RELEASE_TARGZ_FILE_NAME}' don't match to CRC."
+## fi
+##
+## tar -xf "./${CMAKE_LATEST_RELEASE_TARGZ_FILE_NAME}" -C "${SOURCE_FOLDER_PROJECT}"
+## mv -f "./${CMAKE_LATEST_RELEASE_TARGZ_FILE_NAME}" "${ARCHIVE_FOLDER_PROJECT}"
+## mv -f "./${CMAKE_LATEST_RELEASE_SHA256_FILE_NAME}" "${ARCHIVE_FOLDER_PROJECT}"
+##
+## # Building cmake project
+## # **********************************************************************
+##
+## CMAKE_LATEST_RELEASE_INSTALLATION_FOLDER="${INSTALL_FOLDER_PROJECT}/${CMAKE_LATEST_RELEASE_NAME}"
+## printf 'Full path to cmake installation folder: %s' "${CMAKE_LATEST_RELEASE_INSTALLATION_FOLDER}"
+##
+## CMAKE_LATEST_RELEASE_SOURCE_FOLDER="${SOURCE_FOLDER_PROJECT}/${CMAKE_LATEST_RELEASE_NAME}"
+## printf 'Full path to cmake source folder: %s' "${CMAKE_LATEST_RELEASE_SOURCE_FOLDER}"
+## cd "${CMAKE_LATEST_RELEASE_SOURCE_FOLDER}"
+##
+## ./bootstrap --prefix="${CMAKE_LATEST_RELEASE_INSTALLATION_FOLDER}/"
+## make
+## make install
+##
 # **********************************************************************
 # echo ${CMAKE_LATEST_RELEASE_HTML}
 # echo ${CMAKE_LATEST_RELEASE_VERSION}
 ########################################################################
 
-#
+# Building gost-engine project.
 ########################################################################
+
+# Downloading last version of gost-engine
+# **********************************************************************
+
+cd "${PROJECT_FOLDER}"
+
+GOST_ENGINE_FIND_FILE_PATTERN="(^gost-engine.+$)"
+GOST_ENGINE_DOWNLOADING_TARGZ_FILE_NAME="tarball"
+GOST_ENGINE_TARGZ_FILE_NAME="gost-engine-last-release.tar.gz"
+GOST_ENGINE_LATEST_RELEASE_URL="https://api.github.com/repos/gost-engine/engine/${GOST_ENGINE_DOWNLOADING_TARGZ_FILE_NAME}"
+wget --no-check-certificate "${GOST_ENGINE_LATEST_RELEASE_URL}"
+mv "${PROJECT_FOLDER}/${GOST_ENGINE_DOWNLOADING_TARGZ_FILE_NAME}" "${PROJECT_FOLDER}/${GOST_ENGINE_TARGZ_FILE_NAME}"
+
+# find . -type f | grep -P ".*sandbox-gmon[.][0-9]*" | xargs rm
+echo $(find . -type f | grep -P ".*sandbox-gmon[.][0-9]*")
+
+# **********************************************************************
+
 ########################################################################
