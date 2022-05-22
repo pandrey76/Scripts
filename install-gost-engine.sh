@@ -160,22 +160,46 @@ ARCHIVE_FOLDER_PROJECT="${PROJECT_FOLDER}/${ARCHIVE_FOLDER_NAME}"
 
 cd "${PROJECT_FOLDER}"
 
-GOST_ENGINE_FIND_FILE_PATTERN="(^gost-engine.+$)"
 GOST_ENGINE_DOWNLOADING_TARGZ_FILE_NAME="tarball"
 GOST_ENGINE_TARGZ_FILE_NAME="gost-engine-last-release.tar.gz"
 
 GOST_ENGINE_LATEST_RELEASE_URL="https://api.github.com/repos/gost-engine/engine/${GOST_ENGINE_DOWNLOADING_TARGZ_FILE_NAME}"
 echo "Url for downloading last release of gost-engine from GitHub: ${GOST_ENGINE_LATEST_RELEASE_URL}"
 
-wget --no-check-certificate "${GOST_ENGINE_LATEST_RELEASE_URL}"
+## wget --no-check-certificate "${GOST_ENGINE_LATEST_RELEASE_URL}"
+##
+## GOST_ENGINE_LATEST_RELEASE_TARGZ_FILE_PATH="${PROJECT_FOLDER}/${GOST_ENGINE_TARGZ_FILE_NAME}"
+## # echo "Path to renaming gost-engine tar.gz file: ${GOST_ENGINE_LATEST_RELEASE_TARGZ_FILE_PATH}"
+##
+## mv  "${PROJECT_FOLDER}/${GOST_ENGINE_DOWNLOADING_TARGZ_FILE_NAME}" "${GOST_ENGINE_LATEST_RELEASE_TARGZ_FILE_PATH}"
+##
+## tar -xf "${GOST_ENGINE_LATEST_RELEASE_TARGZ_FILE_PATH}" -C "${SOURCE_FOLDER_PROJECT}"
+## mv -f "${GOST_ENGINE_LATEST_RELEASE_TARGZ_FILE_PATH}" "${ARCHIVE_FOLDER_PROJECT}"
+##
+cd "${SOURCE_FOLDER_PROJECT}"
 
-GOST_ENGINE_LATEST_RELEASE_TARGZ_FILE_PATH="${PROJECT_FOLDER}/${GOST_ENGINE_TARGZ_FILE_NAME}"
-# echo "Path to renaming gost-engine tar.gz file: ${GOST_ENGINE_LATEST_RELEASE_TARGZ_FILE_PATH}"
+GOST_ENGINE_SOURCE_FOLDER_NAME=""
 
-mv  "${PROJECT_FOLDER}/${GOST_ENGINE_DOWNLOADING_TARGZ_FILE_NAME}" "${GOST_ENGINE_LATEST_RELEASE_TARGZ_FILE_PATH}"
+for FOLDER in */
+  do
+   echo "${FOLDER}"
+     [[ ${FOLDER} =~ ^(gost-engine.*)/$ ]] && GOST_ENGINE_SOURCE_FOLDER_NAME="${BASH_REMATCH[1]}"
+     if [[ -z "${GOST_ENGINE_SOURCE_FOLDER_NAME}" ]]
+       then
+        continue
+     else
+        echo "${GOST_ENGINE_SOURCE_FOLDER_NAME}"
+        break
+     fi
+done
 
-tar -xf "${GOST_ENGINE_LATEST_RELEASE_TARGZ_FILE_PATH}" -C "${SOURCE_FOLDER_PROJECT}"
-mv -f "${GOST_ENGINE_LATEST_RELEASE_TARGZ_FILE_PATH}" "${ARCHIVE_FOLDER_PROJECT}"
+if [[ -z "${GOST_ENGINE_SOURCE_FOLDER_NAME}" ]]
+  then
+   echo "Can't match gost-engine source folder!"
+   exit 1
+fi
+## [[ ${CMAKE_LATEST_RELEASE_HTML} =~ .*cmake-([0-9][.][0-9][0-9][.][0-9])-SHA-256[.]txt.* ]] && CMAKE_LATEST_RELEASE_VERSION="${BASH_REMATCH[1]}"
+# echo $(find "${SOURCE_FOLDER_PROJECT}" -type d | grep -P "${GOST_ENGINE_FIND_FILE_PATTERN}")
 #
 # find . -type f | grep -P ".*sandbox-gmon[.][0-9]*" | xargs rm
 # echo $(find . -type f | grep -P ".*sandbox-gmon[.][0-9]*")
