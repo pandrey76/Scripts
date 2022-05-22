@@ -163,12 +163,22 @@ cd "${PROJECT_FOLDER}"
 GOST_ENGINE_FIND_FILE_PATTERN="(^gost-engine.+$)"
 GOST_ENGINE_DOWNLOADING_TARGZ_FILE_NAME="tarball"
 GOST_ENGINE_TARGZ_FILE_NAME="gost-engine-last-release.tar.gz"
-GOST_ENGINE_LATEST_RELEASE_URL="https://api.github.com/repos/gost-engine/engine/${GOST_ENGINE_DOWNLOADING_TARGZ_FILE_NAME}"
-wget --no-check-certificate "${GOST_ENGINE_LATEST_RELEASE_URL}"
-mv "${PROJECT_FOLDER}/${GOST_ENGINE_DOWNLOADING_TARGZ_FILE_NAME}" "${PROJECT_FOLDER}/${GOST_ENGINE_TARGZ_FILE_NAME}"
 
+GOST_ENGINE_LATEST_RELEASE_URL="https://api.github.com/repos/gost-engine/engine/${GOST_ENGINE_DOWNLOADING_TARGZ_FILE_NAME}"
+echo "Url for downloading last release of gost-engine from GitHub: ${GOST_ENGINE_LATEST_RELEASE_URL}"
+
+wget --no-check-certificate "${GOST_ENGINE_LATEST_RELEASE_URL}"
+
+GOST_ENGINE_LATEST_RELEASE_TARGZ_FILE_PATH="${PROJECT_FOLDER}/${GOST_ENGINE_TARGZ_FILE_NAME}"
+# echo "Path to renaming gost-engine tar.gz file: ${GOST_ENGINE_LATEST_RELEASE_TARGZ_FILE_PATH}"
+
+mv  "${PROJECT_FOLDER}/${GOST_ENGINE_DOWNLOADING_TARGZ_FILE_NAME}" "${GOST_ENGINE_LATEST_RELEASE_TARGZ_FILE_PATH}"
+
+tar -xf "${GOST_ENGINE_LATEST_RELEASE_TARGZ_FILE_PATH}" -C "${SOURCE_FOLDER_PROJECT}"
+mv -f "${GOST_ENGINE_LATEST_RELEASE_TARGZ_FILE_PATH}" "${ARCHIVE_FOLDER_PROJECT}"
+#
 # find . -type f | grep -P ".*sandbox-gmon[.][0-9]*" | xargs rm
-echo $(find . -type f | grep -P ".*sandbox-gmon[.][0-9]*")
+# echo $(find . -type f | grep -P ".*sandbox-gmon[.][0-9]*")
 
 # **********************************************************************
 
