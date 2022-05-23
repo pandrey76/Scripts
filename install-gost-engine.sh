@@ -168,6 +168,8 @@ cd "${PROJECT_FOLDER}"
 # Можно и через git загрузить последнюю версию
 # git clone "https://github.com/gost-engine/engine.git"
 
+GITHUB_DOWNLOADING_TARGZ_FILE_NAME="tarball"
+
 GOST_ENGINE_DOWNLOADING_TARGZ_FILE_NAME="tarball"
 GOST_ENGINE_TARGZ_FILE_NAME="gost-engine-last-release.tar.gz"
 
@@ -210,14 +212,57 @@ fi
 GOST_ENGINE_SOURCE_FOLDER_PATH="${SOURCE_FOLDER_PROJECT}/${GOST_ENGINE_SOURCE_FOLDER_NAME}"
 echo "Full path to gost-engine folder: ${GOST_ENGINE_SOURCE_FOLDER_PATH}"
 
-cd "${GOST_ENGINE_SOURCE_FOLDER_PATH}"
-
 # Download libprove
 # **********************************************************************
 
+cd "${PROJECT_FOLDER}"
+LIBPROV_TARGZ_FILE_NAME="libprov-last-release.tar.gz"
 # Загружаем в исходники gost-engine проект libprove
 # Можно и через git также загрузить последнюю версию libprove
 # git clone "https://github.com/provider-corner/libprov.git"
+LIBPROV_LATEST_RELEASE_URL="https://api.github.com/repos/provider-corner/libprov/${GITHUB_DOWNLOADING_TARGZ_FILE_NAME}"
+echo "Url for downloading last release of libprov from GitHub: ${LIBPROV_LATEST_RELEASE_URL}"
+
+wget --no-check-certificate "${LIBPROV_LATEST_RELEASE_URL}"
+
+LIBPROV_LATEST_RELEASE_TARGZ_FILE_PATH="${ARCHIVE_FOLDER_PROJECT}/${LIBPROV_TARGZ_FILE_NAME}"
+# echo "Path to renaming gost-engine tar.gz file: ${GOST_ENGINE_LATEST_RELEASE_TARGZ_FILE_PATH}"
+
+mv  "${PROJECT_FOLDER}/${GITHUB_DOWNLOADING_TARGZ_FILE_NAME}" "${LIBPROV_LATEST_RELEASE_TARGZ_FILE_PATH}"
+
+tar -xf "${LIBPROV_LATEST_RELEASE_TARGZ_FILE_PATH}" -C "${SOURCE_FOLDER_PROJECT}"
+
+cd "${SOURCE_FOLDER_PROJECT}"
+LIBPROV_SOURCE_FOLDER_NAME=""
+
+for FOLDER in */
+  do
+   echo "${FOLDER}"
+     [[ ${FOLDER} =~ ^(.*libprov.*)/$ ]] && LIBPROV_SOURCE_FOLDER_NAME="${BASH_REMATCH[1]}"
+     if [[ -z "${LIBPROV_SOURCE_FOLDER_NAME}" ]]
+       then
+        continue
+     else
+        echo "${LIBPROV_SOURCE_FOLDER_NAME}"
+        break
+     fi
+done
+##
+if [[ -z "${LIBPROV_SOURCE_FOLDER_NAME}" ]]
+  then
+   echo "Can't match gost-engine source folder!"
+   exit 1
+fi
+# echo $(find "${SOURCE_FOLDER_PROJECT}" -type d | grep -P "${GOST_ENGINE_FIND_FILE_PATTERN}")
+LIBPROV_SOURCE_FOLDER_PATH="${SOURCE_FOLDER_PROJECT}/${LIBPROV_SOURCE_FOLDER_NAME}"
+echo "Full path to libprov folder: ${LIBPROV_SOURCE_FOLDER_PATH}"
+
+cd "${LIBPROV_SOURCE_FOLDER_PATH}"
+
+# cp -a ./provider-corner-libprov-e7057be/. /home/admin1/acvp/Scripts/GOST_ENGINE/SOURCE/gost-engine-engine-b2b4d62/libprov/
+cp -a "${LIBPROV_SOURCE_FOLDER_PATH}/." "${GOST_ENGINE_SOURCE_FOLDER_PATH}/libprov/"
+rm -rf "${LIBPROV_SOURCE_FOLDER_PATH}"
+# echo $(ls)
 
 # **********************************************************************
 
