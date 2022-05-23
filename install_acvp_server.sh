@@ -1,22 +1,22 @@
 #!bin/bash
 
-CURRENT_USER=""
+PATH_TO_GIT_PROJECT_FOLDER=""
 if [ $# -eq 0 ]
   then
     echo "Error! No any command prompt arguments supplied."
-    exit 0
+    exit 1
 else
     if [ -z "$1" ]
       then
         echo "Error! No first command prompt argument supplied."
-        exit 0
+        exit 1
     else
         echo "The current user: $1"
-        CURRENT_USER="$1"
+        PATH_TO_GIT_PROJECT_FOLDER="$1"
     fi
 fi
 
-if [ -z "${CURRENT_USER}" ]
+if [ -z "${PATH_TO_GIT_PROJECT_FOLDER}" ]
   then
     echo "Error! Don't entered the current user."
     exit 0
@@ -48,8 +48,8 @@ else
         echo "The folder ${CRYPTOGRAPHY_VERIFICATION_SERVER_FOLDER} is correctly removed."
 fi        
 
-echo "Clone from reprs: /media/${CURRENT_USER}/9269-8EE1/local_git_reprs/${CURRENT_REPOSITORY_NAME}"
-git clone "/media/${CURRENT_USER}/9269-8EE1/local_git_reprs/${CURRENT_REPOSITORY_NAME}"
+echo "Clone from reprs: ${PATH_TO_GIT_PROJECT_FOLDER}/${CURRENT_REPOSITORY_NAME}"
+git clone "${PATH_TO_GIT_PROJECT_FOLDER}/${CURRENT_REPOSITORY_NAME}"
 
 if [ -d "${CRYPTOGRAPHY_VERIFICATION_SERVER_FOLDER}" ]
     then
