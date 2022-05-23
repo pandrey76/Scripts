@@ -1,6 +1,6 @@
 #!bin/bash
 
-PATH_TO_GIT_PROJECT_FOLDER=""
+PATH_TO_BASE_INSTALLATION_FOLDER=""
 if [ $# -eq 0 ]
   then
     echo "Error! No any command prompt arguments supplied."
@@ -11,30 +11,51 @@ else
         echo "Error! No first command prompt argument supplied."
         exit 1
     else
-        echo "The current user: $1"
-        PATH_TO_GIT_PROJECT_FOLDER="$1"
+        echo "First command line argument: $1"
+        if [[ -z $(realpath "${1}") ]]
+          then
+            echo "The command line argument cannot have path to folder structure."
+            exit 1
+        fi
+        PATH_TO_BASE_INSTALLATION_FOLDER=$(realpath "${1}")
+        echo "Real path to base installation folder: ${PATH_TO_BASE_INSTALLATION_FOLDER}"
+        if [[ ! -d ${PATH_TO_BASE_INSTALLATION_FOLDER} ]]
+          then
+            echo "Path to base installation folder doesn't exist!"
+            exit 1
+        fi
     fi
 fi
 
-if [ -z "${PATH_TO_GIT_PROJECT_FOLDER}" ]
+echo "Path to base installation folder: ${PATH_TO_BASE_INSTALLATION_FOLDER}"
+
+PATH_TO_GIT_PROJECT_REPOSITORY=""
+if [ -z "$2" ]
   then
-    echo "Error! Don't entered the current user."
-    exit 0
+    echo "Error! No second command prompt argument supplied."
+    exit 1
+else
+    echo "The second command prompt argument: $2"
+    PATH_TO_GIT_PROJECT_REPOSITORY="$2"
 fi
 
-# echo "Go to home folder"
-# cd ~
-#
-# echo "Go to ~./acvp folder"
-# cd acvp
-
-CURRENT_REPOSITORY_NAME="CryptographyVerificationServer"
-echo "Current git repository name: ${CURRENT_REPOSITORY_NAME}"
+if [ -z "${PATH_TO_GIT_PROJECT_REPOSITORY}" ]
+  then
+    echo "Error! Don't enter the path to git repository project."
+    exit 1
+fi
 
 CURRENT_SCRIPT_FOLDER=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
 echo "Current script folder: ${CURRENT_SCRIPT_FOLDER}"
 
-CRYPTOGRAPHY_VERIFICATION_SERVER_FOLDER="${CURRENT_SCRIPT_FOLDER}/${CURRENT_REPOSITORY_NAME}"
+# CURRENT_REPOSITORY_NAME="CryptographyVerificationServer"
+CURRENT_REPOSITORY_NAME=$(basename  ${PATH_TO_GIT_PROJECT_REPOSITORY})
+echo "Current git repository name: ${CURRENT_REPOSITORY_NAME}"
+
+CURRENT_REPOSITORY_NAME=$(echo "${CURRENT_REPOSITORY_NAME}" | sed -r 's|^(.*)[.]git$|\1|')
+echo "Current git repository name without '.git' extension: ${CURRENT_REPOSITORY_NAME}"
+
+CRYPTOGRAPHY_VERIFICATION_SERVER_FOLDER="${PATH_TO_BASE_INSTALLATION_FOLDER}/${CURRENT_REPOSITORY_NAME}"
 echo "Full path to project ${CURRENT_REPOSITORY_NAME} folder: ${CRYPTOGRAPHY_VERIFICATION_SERVER_FOLDER}"
 
 echo "Remove folder: ${CRYPTOGRAPHY_VERIFICATION_SERVER_FOLDER}"
@@ -48,8 +69,8 @@ else
         echo "The folder ${CRYPTOGRAPHY_VERIFICATION_SERVER_FOLDER} is correctly removed."
 fi        
 
-echo "Clone from reprs: ${PATH_TO_GIT_PROJECT_FOLDER}/${CURRENT_REPOSITORY_NAME}"
-git clone "${PATH_TO_GIT_PROJECT_FOLDER}/${CURRENT_REPOSITORY_NAME}"
+echo "Clone from reprs: ${PATH_TO_GIT_PROJECT_REPOSITORY}"
+git clone "${PATH_TO_GIT_PROJECT_REPOSITORY}"
 
 if [ -d "${CRYPTOGRAPHY_VERIFICATION_SERVER_FOLDER}" ]
     then
@@ -87,22 +108,26 @@ chmod a+x "${PATH_TO_INSTALLATION_SCRIPT}"
 
 PATH_TO_PYTHON=""
 
-if [ -z "$2" ]
+if [ -z "$3" ]
   then
     PATH_TO_PYTHON="python3"
 else
-    PATH_TO_PYTHON="$2"
+    PATH_TO_PYTHON="$3"
 fi
 echo "Full path to python interpretater: ${PATH_TO_PYTHON}"
 
 PATH_TO_ACVP_INTERNAL_CLIENT_REALIZATION=""
-if [ -z "$3" ]
+if [ -z "$4" ]
   then
     PATH_TO_ACVP_INTERNAL_CLIENT_REALIZATION="/home/admin1/acvp/ACVP_PROJECT/INSTALLATION/libacvp_install/bin/acvp_app"
 else
-    PATH_TO_ACVP_INTERNAL_CLIENT_REALIZATION="$3"
+    PATH_TO_ACVP_INTERNAL_CLIENT_REALIZATION="$4"
 fi
 echo "Full path to internal client realization: ${PATH_TO_ACVP_INTERNAL_CLIENT_REALIZATION}"
 
 echo "Run script with params: bash ${PATH_TO_INSTALLATION_SCRIPT} ${PATH_TO_PYTHON} ${PATH_TO_ACVP_INTERNAL_CLIENT_REALIZATION}"
 bash "${PATH_TO_INSTALLATION_SCRIPT}" "${PATH_TO_PYTHON}" "${PATH_TO_ACVP_INTERNAL_CLIENT_REALIZATION}"
+
+# Running script command prompt:
+# admin1@ubuntu18:~/acvp/Scripts$ bash install_acvp_server.sh . /home/admin1/VM_SharedFolder/local_git_reprs/CryptographyVerificationServer python3 /home/admin1/acvp/ACVP-CLIENT/ACVP_PROJECT/INSTALLATION/libacvp_install/bin/acvp_app
+# admin1@ubuntu18:~/acvp/Scripts$ bash install_acvp_server.sh /home/admin1/acvp/bin/ /home/admin1/VM_SharedFolder/local_git_reprs/CryptographyVerificationServer python3 /home/admin1/acvp/ACVP-CLIENT/ACVP_PROJECT/INSTALLATION/libacvp_install/bin/acvp_app
