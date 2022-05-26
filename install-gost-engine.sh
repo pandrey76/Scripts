@@ -55,6 +55,7 @@ PROJECT_FOLDER_NAME="GOST_ENGINE"
 INSTALL_FOLDER_NAME="INSTALLATION"
 SOURCE_FOLDER_NAME="SOURCE"
 ARCHIVE_FOLDER_NAME="ARCHIVE"
+TEST_FOLDER_NAME="TEST"
 
 echo "Working script ${BASH_SOURCE[0]}"
 CURRENT_SCRIPT_FOLDER=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
@@ -74,11 +75,12 @@ cd "${PROJECT_FOLDER}"
 mkdir -p "${INSTALL_FOLDER_NAME}"
 mkdir -p "${SOURCE_FOLDER_NAME}"
 mkdir -p "${ARCHIVE_FOLDER_NAME}"
+mkdir -p "${TEST_FOLDER_NAME}"
 
 INSTALL_FOLDER_PROJECT="${PROJECT_FOLDER}/${INSTALL_FOLDER_NAME}"
 SOURCE_FOLDER_PROJECT="${PROJECT_FOLDER}/${SOURCE_FOLDER_NAME}"
 ARCHIVE_FOLDER_PROJECT="${PROJECT_FOLDER}/${ARCHIVE_FOLDER_NAME}"
-
+TEST_FOLDER_NAME="${PROJECT_FOLDER}"/"${TEST_FOLDER_NAME}"
 
 
 # OpenSSL project
@@ -101,6 +103,10 @@ make install
 make test
 
 # export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${OPENSSL_INSTALL}/lib"
+cd "${OPENSSL_INSTALL_FOLDER}"/*ssl*
+OPENSSL_SSL_FOLDER_PATH=$(pwd)
+OPENSSL_CONF_FILE_NAME="openssl.cnf"
+cp -f "${SOURCE_FOLDER_PROJECT}"/"${OPENSSL_NAME}"/apps/${OPENSSL_CONF_FILE_NAME} ${ARCHIVE_FOLDER_PROJECT}/${OPENSSL_CONF_FILE_NAME}
 
 
 ########################################################################
@@ -111,7 +117,7 @@ make test
 CMAKE_LATEST_RELEASE_URL="https://cmake.org/files/LatestRelease/"
 CMAKE_LATEST_RELEASE_HTML=$(curl -s ${CMAKE_LATEST_RELEASE_URL})
 [[ ${CMAKE_LATEST_RELEASE_HTML} =~ .*cmake-([0-9][.][0-9][0-9][.][0-9])-SHA-256[.]txt.* ]] && CMAKE_LATEST_RELEASE_VERSION="${BASH_REMATCH[1]}"
-##
+
 if [[ -z ${CMAKE_LATEST_RELEASE_HTML} ]]
 then
     echo "Can't check for latest version of cmake"
@@ -140,7 +146,7 @@ mv -f "./${CMAKE_LATEST_RELEASE_SHA256_FILE_NAME}" "${ARCHIVE_FOLDER_PROJECT}"
 
 # Building cmake project
 # **********************************************************************
-CMAKE_LATEST_RELEASE_NAME="cmake-3.23.1"
+# CMAKE_LATEST_RELEASE_NAME="cmake-3.23.1"
 
 CMAKE_LATEST_RELEASE_INSTALLATION_FOLDER="${INSTALL_FOLDER_PROJECT}/${CMAKE_LATEST_RELEASE_NAME}"
 printf 'Full path to cmake installation folder: %s' "${CMAKE_LATEST_RELEASE_INSTALLATION_FOLDER}"
@@ -248,7 +254,7 @@ for FOLDER in */
         break
      fi
 done
-##
+
 if [[ -z "${LIBPROV_SOURCE_FOLDER_NAME}" ]]
   then
    echo "Can't match gost-engine source folder!"
@@ -289,11 +295,11 @@ cd "${GOST_ENGINE_BUILD_FOLDER_PATH}"
 # /home/admin1/acvp/Scripts/GOST_ENGINE/INSTALLATION/cmake-3.23.1/bin/cmake --build . --target install
 # /home/admin1/acvp/Scripts/GOST_ENGINE/INSTALLATION/cmake-3.23.1/bin/cmake -DOPENSSL_ROOT_DIR=/home/admin1/acvp/Scripts/GOST_ENGINE/INSTALLATION/openssl-3.0.3 -DOPENSSL_ENGINES_DIR=/home/admin1/acvp/Scripts/GOST_ENGINE/INSTALLATION/openssl-3.0.3/lib64/engines-3 ..
 
-##"${CMAKE_LATEST_RELEASE_EXECUTING_PATH}" -DOPENSSL_ROOT_DIR="${OPENSSL_INSTALL_FOLDER}" -DCMAKE_BUILD_TYPE=Debug ..
-##"${CMAKE_LATEST_RELEASE_EXECUTING_PATH}" --build . --config Debug
-##make
-##make test CTEST_OUTPUT_ON_FAILURE=1
-##make tcl_tests
+"${CMAKE_LATEST_RELEASE_EXECUTING_PATH}" -DOPENSSL_ROOT_DIR="${OPENSSL_INSTALL_FOLDER}" -DCMAKE_BUILD_TYPE=Debug ..
+"${CMAKE_LATEST_RELEASE_EXECUTING_PATH}" --build . --config Debug
+make
+make test CTEST_OUTPUT_ON_FAILURE=1
+make tcl_tests
 
 # Coping gost.so file to openssl engine folder
 # **********************************************************************
@@ -313,10 +319,11 @@ echo "${OPENSSL_RUN_ENVIRONMENT}" "${OPENSSL_INSTALL_FOLDER}"/bin/openssl versio
 
 export ${OPENSSL_RUN_ENVIRONMENT}
 # ${OPENSSL_RUN_ENVIRONMENT} ${OPENSSL_INSTALL_FOLDER}/bin/openssl version -e
+
+cp -f ${ARCHIVE_FOLDER_PROJECT}/${OPENSSL_CONF_FILE_NAME} ${OPENSSL_SSL_FOLDER_PATH}/${OPENSSL_CONF_FILE_NAME}
 ${OPENSSL_INSTALL_FOLDER}/bin/openssl version -e
 ${OPENSSL_INSTALL_FOLDER}/bin/openssl engine
 
-cp -f ${ARCHIVE_FOLDER_PROJECT}/${OPENSSL_CONF_FILE_NAME} ${OPENSSL_SSL_FOLDER_PATH}/${OPENSSL_CONF_FILE_NAME}
 
 # GOST_ENGINE_EXAMPLE_CONF_FILE_CONTENT=$(cat "${GOST_ENGINE_SOURCE_FOLDER_PATH}"/example.conf)
 #hello=ho02123ware38384you443d34o3434ingtod38384day
@@ -328,7 +335,7 @@ cp -f ${ARCHIVE_FOLDER_PROJECT}/${OPENSSL_CONF_FILE_NAME} ${OPENSSL_SSL_FOLDER_P
 # sed -r 's|(.*)/(.*)|\2-\1|')
 # echo ${GOST_ENGINE_EXAMPLE_CONF_FILE_CONTENT}
 #SED_PARAM_FOR_INJECT_TO_OPENSSL_CNF_FILE="s|(^\W*oid_section\W*=\W*new_oids\W*$)|\1${GOST_ENGINE_EXAMPLE_CONF_FILE_CONTENT}|"
-##${GOST_ENGINE_EXAMPLE_CONF_FILE_CONTENT}
+# ${GOST_ENGINE_EXAMPLE_CONF_FILE_CONTENT}
 
 # **************** ATTENTION!!! **************************
 # По каким-то не ясным причинам sed не нравится содержимое файла example.conf, а точнее символы переноса новой строки.
@@ -358,7 +365,7 @@ cp -f ${ARCHIVE_FOLDER_PROJECT}/${OPENSSL_CONF_FILE_NAME} ${OPENSSL_SSL_FOLDER_P
 # dynamic_path = /home/admin1/acvp/Scripts/GOST_ENGINE/INSTALLATION/openssl-3.0.3/ssl/gost.so
 # default_algorithms = ALL
 
-## ******************************************************
+# ******************************************************
 
 GOST_ENGINE_OPENSSL_CONF_FILE_CONTENT=$(<"${OPENSSL_SSL_FOLDER_PATH}"/"${OPENSSL_CONF_FILE_NAME}")
 # echo "${GOST_ENGINE_OPENSSL_CONF_FILE_CONTENT}"
@@ -367,7 +374,7 @@ GOST_ENGINE_OPENSSL_CONF_FILE_CONTENT=$(<"${OPENSSL_SSL_FOLDER_PATH}"/"${OPENSSL
 
 # По какой-то не понятной причине считывание происходит в одну строку, так что делаем по другому
 # echo $(<"${GOST_ENGINE_SOURCE_FOLDER_PATH}"/example.conf) >> "${OPENSSL_SSL_FOLDER_PATH}"/"${OPENSSL_CONF_FILE_NAME}"
-
+echo "${OPENSSL_SSL_FOLDER_PATH}"/"${OPENSSL_CONF_FILE_NAME}"
 echo "${BASH_REMATCH[1]}" > "${OPENSSL_SSL_FOLDER_PATH}"/"${OPENSSL_CONF_FILE_NAME}"
 
 printf "%s\n" "openssl_conf = openssl_def" >> "${OPENSSL_SSL_FOLDER_PATH}"/"${OPENSSL_CONF_FILE_NAME}"
@@ -390,16 +397,17 @@ ${OPENSSL_INSTALL_FOLDER}/bin/openssl engine
 
 
 # Тестирование работы openssl с gost-engine
+# cd "${TEST_FOLDER_NAME}"
 ${OPENSSL_INSTALL_FOLDER}/bin/openssl genpkey -algorithm gost2012_256 -pkeyopt paramset:TCB -out ca.key
 ${OPENSSL_INSTALL_FOLDER}/bin/openssl req -new -x509 -md_gost12_256 -days 365 -key ca.key -out ca.cer -subj "/C=RU/ST=Russia/L=Moscow/O=SuperPlat/OU=SuperPlat CA/CN=SuperPlat CA Root"
 ${OPENSSL_INSTALL_FOLDER}/bin/openssl x509 -in ca.cer -text -noout
 
-## ******************************************************
-##
-## Проверка подписи, пример с сайта CryptoPro
-## **********************************************************************
+#******************************************************
 
-## openssl cms -sign -engine gostengy -keyform ENGINE -inkey www.example.com -in "doc.txt" -out "doc.signed.txt" -outform PEM -CAfile /path/to/cert/www.example.com.cer -nodetach -signer /path/to/cert/www.example.com.cer
+# Проверка подписи, пример с сайта CryptoPro
+#**********************************************************************
 
-## **********************************************************************
-########################################################################
+# openssl cms -sign -engine gostengy -keyform ENGINE -inkey www.example.com -in "doc.txt" -out "doc.signed.txt" -outform PEM -CAfile /path/to/cert/www.example.com.cer -nodetach -signer /path/to/cert/www.example.com.cer
+
+#**********************************************************************
+######################################################################
