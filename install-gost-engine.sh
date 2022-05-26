@@ -140,6 +140,7 @@ mv -f "./${CMAKE_LATEST_RELEASE_SHA256_FILE_NAME}" "${ARCHIVE_FOLDER_PROJECT}"
 
 # Building cmake project
 # **********************************************************************
+CMAKE_LATEST_RELEASE_NAME="cmake-3.23.1"
 
 CMAKE_LATEST_RELEASE_INSTALLATION_FOLDER="${INSTALL_FOLDER_PROJECT}/${CMAKE_LATEST_RELEASE_NAME}"
 printf 'Full path to cmake installation folder: %s' "${CMAKE_LATEST_RELEASE_INSTALLATION_FOLDER}"
@@ -266,45 +267,132 @@ rm -rf "${LIBPROV_SOURCE_FOLDER_PATH}"
 
 # **********************************************************************
 
-# Build gostl-engie
+# Build gost-engie
+# **********************************************************************
+cd "${GOST_ENGINE_SOURCE_FOLDER_PATH}"
+CMAKE_LATEST_RELEASE_EXECUTING_PATH="${CMAKE_LATEST_RELEASE_INSTALLATION_FOLDER}/bin/cmake"
+echo "Full path to cmake executing file: ${CMAKE_LATEST_RELEASE_EXECUTING_PATH}"
+GOST_ENGINE_BUILD_FOLDER_PATH="${GOST_ENGINE_SOURCE_FOLDER_PATH}/build"
+mkdir -p "${GOST_ENGINE_BUILD_FOLDER_PATH}"
+cd "${GOST_ENGINE_BUILD_FOLDER_PATH}"
+
+# Можно и так запускать
+# **********************************************************************
+# ${CMAKE_LATEST_RELEASE_EXECUTING_PATH} --version
+# ${CMAKE_LATEST_RELEASE_EXECUTING_PATH} "--version"
+# "${CMAKE_LATEST_RELEASE_EXECUTING_PATH}" --version
 # **********************************************************************
 
-## Еще один скрипт сборки gost-engine находится по пути ./gost-engine-engine-ee1986c/.github/script.sh.
-## /home/admin1/acvp/Scripts/GOST_ENGINE/INSTALLATION/cmake-3.23.1/bin/cmake -DOPENSSL_ROOT_DIR=/home/admin1/acvp/Scripts/GOST_ENGINE/INSTALLATION/openssl-3.0.3/ ..
-## /home/admin1/acvp/Scripts/GOST_ENGINE/INSTALLATION/cmake-3.23.1/bin/cmake --build . --config Debug
-## /home/admin1/acvp/Scripts/GOST_ENGINE/INSTALLATION/cmake-3.23.1/bin/cmake --build . --target install
-## /home/admin1/acvp/Scripts/GOST_ENGINE/INSTALLATION/cmake-3.23.1/bin/cmake -DOPENSSL_ROOT_DIR=/home/admin1/acvp/Scripts/GOST_ENGINE/INSTALLATION/openssl-3.0.3 -DOPENSSL_ENGINES_DIR=/home/admin1/acvp/Scripts/GOST_ENGINE/INSTALLATION/openssl-3.0.3/lib64/engines-3 ..
-## make
-## make test CTEST_OUTPUT_ON_FAILURE=1
-## make tcl_tests
+# Еще один скрипт сборки gost-engine находится по пути ./gost-engine-engine-ee1986c/.github/script.sh.
+# /home/admin1/acvp/Scripts/GOST_ENGINE/INSTALLATION/cmake-3.23.1/bin/cmake -DOPENSSL_ROOT_DIR=/home/admin1/acvp/Scripts/GOST_ENGINE/INSTALLATION/openssl-3.0.3/ ..
+# /home/admin1/acvp/Scripts/GOST_ENGINE/INSTALLATION/cmake-3.23.1/bin/cmake --build . --config Debug
+# /home/admin1/acvp/Scripts/GOST_ENGINE/INSTALLATION/cmake-3.23.1/bin/cmake --build . --target install
+# /home/admin1/acvp/Scripts/GOST_ENGINE/INSTALLATION/cmake-3.23.1/bin/cmake -DOPENSSL_ROOT_DIR=/home/admin1/acvp/Scripts/GOST_ENGINE/INSTALLATION/openssl-3.0.3 -DOPENSSL_ENGINES_DIR=/home/admin1/acvp/Scripts/GOST_ENGINE/INSTALLATION/openssl-3.0.3/lib64/engines-3 ..
 
+##"${CMAKE_LATEST_RELEASE_EXECUTING_PATH}" -DOPENSSL_ROOT_DIR="${OPENSSL_INSTALL_FOLDER}" -DCMAKE_BUILD_TYPE=Debug ..
+##"${CMAKE_LATEST_RELEASE_EXECUTING_PATH}" --build . --config Debug
+##make
+##make test CTEST_OUTPUT_ON_FAILURE=1
+##make tcl_tests
+
+# Coping gost.so file to openssl engine folder
 # **********************************************************************
+GOST_ENGINE_LIBRARY_FILE_NAME="gost.so"
+cd "${OPENSSL_INSTALL_FOLDER}"/lib*
+OPENSSL_RUN_ENVIRONMENT="LD_LIBRARY_PATH=$(pwd)"
+echo "OPENSSL_RUN_ENVIRONMENT: ${OPENSSL_RUN_ENVIRONMENT}"
 
-## cp /home/admin1/acvp/Scripts/GOST_ENGINE/SOURCE/gost-engine-engine-ee1986c/build/bin/gost.so /home/admin1/acvp/Scripts/GOST_ENGINE/INSTALLATION/openssl-3.0.3/ssl/gost.so
-##
-## В файл openssl.cnf после инструкции "oid_section = new_oids" добавить следующий код (он в приципе приведен в файле example.cnf):
+cd $(pwd)/engine*
+
+OPENSSL_ENGINE_FOLDER_PATH=$(pwd)
+# echo "cp ${GOST_ENGINE_BUILD_FOLDER_PATH}/bin/${GOST_ENGINE_LIBRARY_FILE_NAME} ${OPENSSL_ENGINE_FOLDER_PATH}/${GOST_ENGINE_LIBRARY_FILE_NAME}"
+cp "${GOST_ENGINE_BUILD_FOLDER_PATH}"/bin/"${GOST_ENGINE_LIBRARY_FILE_NAME}" "${OPENSSL_ENGINE_FOLDER_PATH}"/${GOST_ENGINE_LIBRARY_FILE_NAME}
+
+
+echo "${OPENSSL_RUN_ENVIRONMENT}" "${OPENSSL_INSTALL_FOLDER}"/bin/openssl version -e
+
+export ${OPENSSL_RUN_ENVIRONMENT}
+# ${OPENSSL_RUN_ENVIRONMENT} ${OPENSSL_INSTALL_FOLDER}/bin/openssl version -e
+${OPENSSL_INSTALL_FOLDER}/bin/openssl version -e
+${OPENSSL_INSTALL_FOLDER}/bin/openssl engine
+
+cp -f ${ARCHIVE_FOLDER_PROJECT}/${OPENSSL_CONF_FILE_NAME} ${OPENSSL_SSL_FOLDER_PATH}/${OPENSSL_CONF_FILE_NAME}
+
+# GOST_ENGINE_EXAMPLE_CONF_FILE_CONTENT=$(cat "${GOST_ENGINE_SOURCE_FOLDER_PATH}"/example.conf)
+#hello=ho02123ware38384you443d34o3434ingtod38384day
+#re='(.*)[0-9]+(.*)'
+#while [[ $hello =~ $re ]]; do
+#  hello=${BASH_REMATCH[1]}${BASH_REMATCH[2]}
+#done
+#echo "$hello"
+# sed -r 's|(.*)/(.*)|\2-\1|')
+# echo ${GOST_ENGINE_EXAMPLE_CONF_FILE_CONTENT}
+#SED_PARAM_FOR_INJECT_TO_OPENSSL_CNF_FILE="s|(^\W*oid_section\W*=\W*new_oids\W*$)|\1${GOST_ENGINE_EXAMPLE_CONF_FILE_CONTENT}|"
+##${GOST_ENGINE_EXAMPLE_CONF_FILE_CONTENT}
+
+# **************** ATTENTION!!! **************************
+# По каким-то не ясным причинам sed не нравится содержимое файла example.conf, а точнее символы переноса новой строки.
+# В hex редакторе это символ 0x0A, надо разбираться, если эти символы выкинуть из файла и всё записать в одну строку,
+# то всё прекрасно работает. Видимо это связано с тем что считывается из потока ввода полученной после команды cat.
+
+# GOST_ENGINE_EXAMPLE_CONF_FILE_CONTENT=$(cat "${GOST_ENGINE_SOURCE_FOLDER_PATH}"/example.conf)
+# GOST_ENGINE_EXAMPLE_CONF_FILE_CONTENT=$(<"${GOST_ENGINE_SOURCE_FOLDER_PATH}"/example.conf) # Тоже не работает, такая же ошибка!!
+# echo ${GOST_ENGINE_EXAMPLE_CONF_FILE_CONTENT}
+# SED_PARAM_FOR_INJECT_TO_OPENSSL_CNF_FILE="s|(^\W*oid_section\W*=\W*new_oids\W*$)|\1\n\n${GOST_ENGINE_EXAMPLE_CONF_FILE_CONTENT}|"
+# sed -i -r  "${SED_PARAM_FOR_INJECT_TO_OPENSSL_CNF_FILE}" ${OPENSSL_SSL_FOLDER_PATH}/${OPENSSL_CONF_FILE_NAME}
+
+# *********************************************************
+
+# В файл openssl.cnf после инструкции "oid_section = new_oids" добавить следующий код (он в приципе приведен в файле example.cnf):
+# ******************************************************
+
+# openssl_conf = openssl_def
+# [openssl_def]
+# engines = engine_section
+#
+# [engine_section]
+# gost = gost_section
+
+# [gost_section]
+# engine_id = gost
+# dynamic_path = /home/admin1/acvp/Scripts/GOST_ENGINE/INSTALLATION/openssl-3.0.3/ssl/gost.so
+# default_algorithms = ALL
+
 ## ******************************************************
 
-## openssl_conf = openssl_def
-## [openssl_def]
-## engines = engine_section
-##
-## [engine_section]
-## gost = gost_section
-##
-## [gost_section]
-## engine_id = gost
-## dynamic_path = /home/admin1/acvp/Scripts/GOST_ENGINE/INSTALLATION/openssl-3.0.3/ssl/gost.so
-## default_algorithms = ALL
+GOST_ENGINE_OPENSSL_CONF_FILE_CONTENT=$(<"${OPENSSL_SSL_FOLDER_PATH}"/"${OPENSSL_CONF_FILE_NAME}")
+# echo "${GOST_ENGINE_OPENSSL_CONF_FILE_CONTENT}"
+[[ "${GOST_ENGINE_OPENSSL_CONF_FILE_CONTENT}" =~ (.*[[:space:]]*oid_section[[:space:]]*=[[:space:]]*new_oids[[:space:]]*)(.*) ]]
+# $(echo "${BASH_REMATCH[1]}"$(<"${GOST_ENGINE_SOURCE_FOLDER_PATH}"/example.conf)"${BASH_REMATCH[2]}") > "${OPENSSL_SSL_FOLDER_PATH}"/"${OPENSSL_CONF_FILE_NAME}"
 
-## ******************************************************
-## Тестирование работы openssl с gost-engine
-## admin1@ubuntu18:~/acvp/Scripts/GOST_ENGINE/INSTALLATION/openssl-3.0.3/bin$ LD_LIBRARY_PATH="/home/admin1/acvp/Scripts/GOST_ENGINE/INSTALLATION/openssl-3.0.3/lib64" ./openssl engine
-## admin1@ubuntu18:~/acvp/Scripts/GOST_ENGINE/INSTALLATION/openssl-3.0.3/bin$ LD_LIBRARY_PATH="/home/admin1/acvp/Scripts/GOST_ENGINE/INSTALLATION/openssl-3.0.3/lib64" ./openssl version -e
-## admin1@ubuntu18:~/acvp/Scripts/GOST_ENGINE/INSTALLATION/openssl-3.0.3/bin$ LD_LIBRARY_PATH="/home/admin1/acvp/Scripts/GOST_ENGINE/INSTALLATION/openssl-3.0.3/lib64" ./openssl genpkey -algorithm gost2012_256 -pkeyopt paramset:TCB -out ca.key
-## admin1@ubuntu18:~/acvp/Scripts/GOST_ENGINE/INSTALLATION/openssl-3.0.3/bin$ LD_LIBRARY_PATH="/home/admin1/acvp/Scripts/GOST_ENGINE/INSTALLATION/openssl-3.0.3/lib64" ./openssl req -new -x509 -md_gost12_256 -days 365 -key ca.key -out ca.cer -subj "/C=RU/ST=Russia/L=Moscow/O=SuperPlat/OU=SuperPlat CA/CN=SuperPlat CA Root"
-## admin1@ubuntu18:~/acvp/Scripts/GOST_ENGINE/INSTALLATION/openssl-3.0.3/bin$ LD_LIBRARY_PATH="/home/admin1/acvp/Scripts/GOST_ENGINE/INSTALLATION/openssl-3.0.3/lib64" ./openssl x509 -in ca.cer -text -noout
+# По какой-то не понятной причине считывание происходит в одну строку, так что делаем по другому
+# echo $(<"${GOST_ENGINE_SOURCE_FOLDER_PATH}"/example.conf) >> "${OPENSSL_SSL_FOLDER_PATH}"/"${OPENSSL_CONF_FILE_NAME}"
 
+echo "${BASH_REMATCH[1]}" > "${OPENSSL_SSL_FOLDER_PATH}"/"${OPENSSL_CONF_FILE_NAME}"
+
+printf "%s\n" "openssl_conf = openssl_def" >> "${OPENSSL_SSL_FOLDER_PATH}"/"${OPENSSL_CONF_FILE_NAME}"
+printf "%s\n" "[openssl_def]" >> "${OPENSSL_SSL_FOLDER_PATH}"/"${OPENSSL_CONF_FILE_NAME}"
+printf "%s\n" "engines = engine_section" >> "${OPENSSL_SSL_FOLDER_PATH}"/"${OPENSSL_CONF_FILE_NAME}"
+printf "%s\n"  >> "${OPENSSL_SSL_FOLDER_PATH}"/"${OPENSSL_CONF_FILE_NAME}"
+printf "%s\n" "[engine_section]" >> "${OPENSSL_SSL_FOLDER_PATH}"/"${OPENSSL_CONF_FILE_NAME}"
+printf "%s\n" "gost = gost_section" >> "${OPENSSL_SSL_FOLDER_PATH}"/"${OPENSSL_CONF_FILE_NAME}"
+printf "%s\n"  >> "${OPENSSL_SSL_FOLDER_PATH}"/"${OPENSSL_CONF_FILE_NAME}"
+printf "%s\n" "[gost_section]" >> "${OPENSSL_SSL_FOLDER_PATH}"/"${OPENSSL_CONF_FILE_NAME}"
+printf "%s\n" "engine_id = gost" >> "${OPENSSL_SSL_FOLDER_PATH}"/"${OPENSSL_CONF_FILE_NAME}"
+printf "%s\n" "dynamic_path = ${OPENSSL_ENGINE_FOLDER_PATH}/${GOST_ENGINE_LIBRARY_FILE_NAME}" >> "${OPENSSL_SSL_FOLDER_PATH}"/"${OPENSSL_CONF_FILE_NAME}"
+printf "%s\n" "default_algorithms = ALL" >> "${OPENSSL_SSL_FOLDER_PATH}"/"${OPENSSL_CONF_FILE_NAME}"
+printf "%s\n"  >> "${OPENSSL_SSL_FOLDER_PATH}"/"${OPENSSL_CONF_FILE_NAME}"
+
+echo "${BASH_REMATCH[2]}" >> "${OPENSSL_SSL_FOLDER_PATH}"/"${OPENSSL_CONF_FILE_NAME}"
+
+${OPENSSL_INSTALL_FOLDER}/bin/openssl version -e
+${OPENSSL_INSTALL_FOLDER}/bin/openssl engine
+
+
+# Тестирование работы openssl с gost-engine
+${OPENSSL_INSTALL_FOLDER}/bin/openssl genpkey -algorithm gost2012_256 -pkeyopt paramset:TCB -out ca.key
+${OPENSSL_INSTALL_FOLDER}/bin/openssl req -new -x509 -md_gost12_256 -days 365 -key ca.key -out ca.cer -subj "/C=RU/ST=Russia/L=Moscow/O=SuperPlat/OU=SuperPlat CA/CN=SuperPlat CA Root"
+${OPENSSL_INSTALL_FOLDER}/bin/openssl x509 -in ca.cer -text -noout
 
 ## ******************************************************
 ##
