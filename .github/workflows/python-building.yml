@@ -1,4 +1,7 @@
 name: python_building CI
+env:
+  DOWNLOAD_FOLDER_NAME : "Temping-downloads"
+  PYTHON_VERSION       : "3.7.3"
 
 on:
   push:
@@ -7,21 +10,43 @@ on:
     branches: [ "master" ]
 
 jobs:
-  build:
+  building:
 
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: configure
-      run: ./configure
-      
-    - name: Install dependencies
-      run: make
-      
-    - name: Run check
-      run: make check
-      
-    - name: Run distcheck
-      run: make distcheck
+    - name: Installing necessary packages
+      run: sudo apt install -y make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget llvm libncurses5-dev libncursesw5-dev xz-utils tk-dev
+
+#    - name: Make download folder
+#      run: |
+#         cd ~
+#         mkdir "./${{ env.DOWNLOAD_FOLDER_NAME }}"
+#         cd "./${{ env.DOWNLOAD_FOLDER_NAME }}"
+#
+#    - name: Download python source archive
+#      run: wget --no-check-certificate "https://www.python.org/ftp/python/${{ env.PYTHON_VERSION }}/Python-${{ env.PYTHON_VERSION }}.tgz"
+#
+#    - name: configure
+#      run: ./configure
+#
+#    - name: Install dependencies
+#      run: make
+#
+#    - name: Run check
+#      run: make check
+#
+#    - name: Run distcheck
+#      run: make distcheck
+
+#  building_script_run:
+#
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#    - name: Clone repository
+#    - uses: actions/checkout@v3
+#
+#    - name: Python building script running
+#      run: ./configure
+

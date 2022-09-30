@@ -24,7 +24,7 @@ mkdir ./${DOWNLOAD_FOLDER_NAME}
 cd "./${DOWNLOAD_FOLDER_NAME}"
 
 
-wget --no-check-certificate "https://www.python.org/ftp/python/${DOWNLOADING_PYTHON_VERSION}/Python-3.8.9.tgz"
+wget --no-check-certificate "https://www.python.org/ftp/python/${DOWNLOADING_PYTHON_VERSION}/Python-${DOWNLOADING_PYTHON_VERSION}.tgz"
 sudo apt update
 sudo apt install -y make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev xz-utils tk-dev
 tar xvf Python-${DOWNLOADING_PYTHON_VERSION}.tgz -C .
