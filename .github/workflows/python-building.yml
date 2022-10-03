@@ -36,6 +36,7 @@ jobs:
          echo "The environment variable INITIAL_FOLDER_NAME is ${{ env.INSTALL_FOLDER_NAME }}."
          cd ~
          INSTALL_FOLDER_NAME=$(pwd)/.python-${{ env.PYTHON_VERSION }}
+         cd "./${{ env.DOWNLOAD_FOLDER_NAME }}"
          cd "./Python-${{ env.PYTHON_VERSION }}"
 
     - name: Check path to installation folder
