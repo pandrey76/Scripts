@@ -32,7 +32,7 @@ jobs:
       run: tar xvf Python-${{ env.PYTHON_VERSION }}.tgz -C .
 
     - name: Construct path to installation folder
-    - run: | 
+      run: | 
          cd ~
          ${{ env.INSTALL_FOLDER_NAME }}=$(pwd)/.python-${DOWNLOADING_PYTHON_VERSION}
          cd ./Python-${{ env.PYTHON_VERSION }}
