@@ -1,6 +1,7 @@
 name: python_building CI
 env:
   DOWNLOAD_FOLDER_NAME : "Temping-downloads"
+  INSTALL_FOLDER_NAME  : ""
   PYTHON_VERSION       : "3.7.3"
 
 on:
@@ -30,10 +31,12 @@ jobs:
     - name: Unpack python sources
       run: tar xvf Python-${{ env.PYTHON_VERSION }}.tgz -C .
 
+    - name: Construct path to installation folder
+    - run: cd ~
+    - run: ${{ env.INSTALL_FOLDER_NAME }}=$(pwd)/.python-${DOWNLOADING_PYTHON_VERSION}
+    - run: cd ./Python-${{ env.PYTHON_VERSION }}
 
-# cd ./Python-${DOWNLOADING_PYTHON_VERSION}
-# INSTALL_FOLDER=$(pwd)/.python-${DOWNLOADING_PYTHON_VERSION}
-#
+
 #    - name: configure
 #      run: ./configure
 #
