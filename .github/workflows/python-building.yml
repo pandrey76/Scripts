@@ -16,7 +16,7 @@ jobs:
 
     steps:
     - name: Installing necessary packages
-      run: sudo apt install -y make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget llvm libncurses5-dev libncursesw5-dev xz-utils tk-dev
+      run: sudo apt install -y make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget llvm libncurses5-dev libncursesw5-dev xz-utils tk-dev tar
 
     - name: Make download folder
       run: |
@@ -26,6 +26,13 @@ jobs:
 
     - name: Download python source archive
       run: wget --no-check-certificate "https://www.python.org/ftp/python/${{ env.PYTHON_VERSION }}/Python-${{ env.PYTHON_VERSION }}.tgz"
+
+    - name: Unpack python sources
+      run: tar xvf Python-${{ env.PYTHON_VERSION }}.tgz -C .
+
+
+# cd ./Python-${DOWNLOADING_PYTHON_VERSION}
+# INSTALL_FOLDER=$(pwd)/.python-${DOWNLOADING_PYTHON_VERSION}
 #
 #    - name: configure
 #      run: ./configure
