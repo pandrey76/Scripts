@@ -1,3 +1,5 @@
 /ACVP_PROJECT
 /CryptographyVerificationServer
 *.pyc
+*.o
+*.so
