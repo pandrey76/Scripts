@@ -85,7 +85,7 @@ TEST_FOLDER_NAME="${PROJECT_FOLDER}"/"${TEST_FOLDER_NAME}"
 
 # OpenSSL project
 ########################################################################
-OPENSSL_VERSION="3.0.3"
+OPENSSL_VERSION="3.3.1" # "3.0.3"
 OPENSSL_NAME="openssl-${OPENSSL_VERSION}"
 OPENSSL_INSTALL_FOLDER="${INSTALL_FOLDER_PROJECT}/${OPENSSL_NAME}"
 export OPENSSL_INSTALL="${OPENSSL_INSTALL_FOLDER}"
@@ -305,6 +305,13 @@ make tcl_tests
 # **********************************************************************
 GOST_ENGINE_LIBRARY_FILE_NAME="gost.so"
 cd "${OPENSSL_INSTALL_FOLDER}"/lib*
+
+################# ATTENTION #################
+# Обязательно необходимо устанавливать переменную окружения OPENSSL_RUN_ENVIRONMENT,
+# которая содержит LD_LIBRARY_PATH="Путь к библиотекам (*.а) установочной директории OpenSSl (lib64)"
+#
+################# ATTENTION #################
+
 OPENSSL_RUN_ENVIRONMENT="LD_LIBRARY_PATH=$(pwd)"
 echo "OPENSSL_RUN_ENVIRONMENT: ${OPENSSL_RUN_ENVIRONMENT}"
 
@@ -411,3 +418,4 @@ ${OPENSSL_INSTALL_FOLDER}/bin/openssl x509 -in ca.cer -text -noout
 
 #**********************************************************************
 ######################################################################
+
