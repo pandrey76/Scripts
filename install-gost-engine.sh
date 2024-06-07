@@ -327,9 +327,13 @@ GOST_ENGINE_LIBRARY_FILE_NAME="gost.so"
 cd "${OPENSSL_INSTALL_FOLDER}"/lib*
 #
 ################# ATTENTION #################
-# Обязательно необходимо устанавливать переменную окружения OPENSSL_RUN_ENVIRONMENT,
-# которая содержит LD_LIBRARY_PATH="Путь к библиотекам (*.а) установочной директории OpenSSl (lib64)"
-#
+# Обязательно необходимо устанавливать переменную окружения LD_LIBRARY_PATH,
+# которая содержит Путь к библиотекам (*.а) установочной директории OpenSSl (lib64)
+# или просто как обычно запускать LD_LIBRARY_PATH как переменную окружения запускаемого процесса, типо:
+# LD_LIBRARY_PATH="/run/media/admin1/T7Common/_uch-23/install/common/openssl/3.3.0/64bit/x86_64/Linux/dev/sh/lib64" ./openssl engine
+# или
+# export LD_LIBRARY_PATH="/run/media/admin1/T7Common/_uch-23/install/common/openssl/3.3.0/64bit/x86_64/Linux/dev/sh/lib64"
+# Тогда gost-engine нормально подхватывется.
 ################# ATTENTION #################
 #
 OPENSSL_RUN_ENVIRONMENT="LD_LIBRARY_PATH=$(pwd)"
