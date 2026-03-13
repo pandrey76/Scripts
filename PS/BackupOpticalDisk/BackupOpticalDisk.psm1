@@ -1,65 +1,33 @@
 ﻿using namespace System.IO
 using namespace System.Collections.Generic
 
-#region Private: CRC32
+#region Private: MD5
 
-function Get-CRC32Internal {
-    [CmdletBinding()]
+function Get-FileMD5Internal {
     param(
-        [Parameter(Position=0, ValueFromPipeline=$true)]
-        [ValidateNotNullOrEmpty()]
-        [byte[]]$InputObject
+        [Parameter(Mandatory = $true)]
+        [string]$Path
     )
-    Begin {
-        function New-CrcTable {
-            [uint32]$c = $null
-            $crcTable = New-Object 'System.UInt32[]' 256
-            for ($n = 0; $n -lt 256; $n++) {
-                $c = [uint32]$n
-                for ($k = 0; $k -lt 8; $k++) {
-                    if ($c -band 1) {
-                        $c = (0xEDB88320 -bxor ($c -shr 1))
-                    } else {
-                        $c = ($c -shr 1)
-                    }
-                }
-                $crcTable[$n] = $c
-            }
-            Write-Output $crcTable
+
+    # Быстрый стандартный способ на базе .NET
+    $md5 = [System.Security.Cryptography.MD5]::Create()
+    try {
+        $stream = [System.IO.File]::OpenRead($Path)
+        try {
+            $hashBytes = $md5.ComputeHash($stream)
+        } finally {
+            $stream.Dispose()
         }
-
-        function Update-Crc ([uint32]$crc, [byte[]]$buffer, [int]$length) {
-            [uint32]$c = $crc
-            if (-not($script:crcTable)) { $script:crcTable = New-CrcTable }
-            for ($n = 0; $n -lt $length; $n++) {
-                $c = ($script:crcTable[($c -bxor $buffer[$n]) -band 0xFF]) -bxor ($c -shr 8)
-            }
-            Write-Output $c
-        }
-
-        $dataArray = @()
+    } finally {
+        $md5.Dispose()
     }
 
-    Process {
-        foreach ($item in $InputObject) { $dataArray += $item }
-    }
-
-    End {
-        $inputLength = $dataArray.Length
-        $val = ((Update-Crc -crc 0xffffffffL -buffer $dataArray -length $inputLength) -bxor 0xffffffffL)
-        return $val
-    }
-}
-
-function Get-FileCRC32Internal {
-    param(
-        [Parameter(Mandatory=$true)][string]$Path
-    )
-    $data = [IO.File]::ReadAllBytes($Path)
-    return Get-CRC32Internal $data
+    # Преобразуем в строку вида "AB12CD..."
+    ($hashBytes | ForEach-Object { $_.ToString("x2") }) -join ''
 }
 
 #endregion
+
 
 #region Private: File type classifier
 
@@ -255,10 +223,10 @@ foreach ($f in $allFiles) {
     if ($f.Attributes -band [FileAttributes]::Compressed) { $attrs += "Compressed" }
     if ($f.Attributes -band [FileAttributes]::Encrypted)  { $attrs += "Encrypted" }
 
-    $crc32 = $null
+  $md5 = $null
     if (-not $SkipCrc) {
-        Write-Verbose "Calculating CRC32 for: $relPath"
-        $crc32 = Get-FileCRC32Internal -Path $fullPath
+        Write-Verbose "Calculating MD5 for: $relPath"
+        $md5 = Get-FileMD5Internal -Path $fullPath
     }
 
     $fileList.Add([ordered]@{
@@ -270,8 +238,8 @@ foreach ($f in $allFiles) {
         LastWriteTime   = $f.LastWriteTimeUtc.ToString('o')
         LastAccessTime  = $f.LastAccessTimeUtc.ToString('o')
         Attributes      = $attrs
-        Crc32           = $crc32
-    })
+        Md5             = $md5
+        })
 }
 
         $extCounts = $fileList | Group-Object -Property {
