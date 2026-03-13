@@ -89,6 +89,57 @@ namespace CustomConverter {
 }
 "@
 
+#endregion
+
+#region Private: Cluster size (GetDiskFreeSpace)
+
+Add-Type -TypeDefinition @"
+using System;
+using System.Runtime.InteropServices;
+
+public static class DiskInfo {
+    [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+    public static extern bool GetDiskFreeSpace(
+        string lpRootPathName,
+        out uint lpSectorsPerCluster,
+        out uint lpBytesPerSector,
+        out uint lpNumberOfFreeClusters,
+        out uint lpTotalNumberOfClusters);
+
+    public static bool GetClusterInfo(string rootPath, out uint clusterSize, out uint bytesPerSector) {
+        uint spc, bps, nfc, tnc;
+        bool ok = GetDiskFreeSpace(rootPath, out spc, out bps, out nfc, out tnc);
+        if (!ok) {
+            clusterSize = 0;
+            bytesPerSector = 0;
+            return false;
+        }
+        clusterSize = spc * bps;
+        bytesPerSector = bps;
+        return true;
+    }
+}
+"@
+
+function Get-ClusterSizeInternal {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$RootPath
+    )
+
+    [uint32]$clusterSize   = 0
+    [uint32]$bytesPerSector = 0
+
+    $ok = [DiskInfo]::GetClusterInfo($RootPath, [ref]$clusterSize, [ref]$bytesPerSector)
+
+    if (-not $ok -or $clusterSize -eq 0) {
+        # Fallback для оптических дисков: 2048 байт на сектор, 1 сектор на кластер
+        Write-Verbose "GetDiskFreeSpace failed or returned 0 cluster size for '$RootPath'. Using fallback 2048 bytes."
+        return 2048
+    }
+
+    return [int]$clusterSize
+}
 
 #endregion
 
@@ -160,6 +211,10 @@ function Backup-OpticalDisk {
             throw "Drive $DriveLetter is not ready."
         }
 
+# Размер кластера файловой системы (или 2048 по умолчанию)
+$clusterSize = Get-ClusterSizeInternal -RootPath "$DriveLetter\"
+Write-Verbose "Cluster size for $DriveLetter is $clusterSize bytes."
+
         $label       = $driveInfo.VolumeLabel
         $fileSystem  = $driveInfo.DriveFormat
         $capacity    = $driveInfo.TotalSize
@@ -210,9 +265,9 @@ foreach ($f in $allFiles) {
     $fullPath = $f.FullName
     $relPath  = $f.FullName.Substring($tempMountDir.Length).TrimStart('\')
 
-    $cluster = 4096
-    $sizeOnDisk = [Math]::Ceiling($f.Length / $cluster) * $cluster
-
+#       $cluster = 4096
+#    $sizeOnDisk = [Math]::Ceiling($f.Length / $cluster) * $cluster
+    $sizeOnDisk = [Math]::Ceiling([double]$f.Length / [double]$clusterSize) * $clusterSize
     $ft = Get-FileTypeInternal $f.Extension
 
     $attrs = @()
@@ -299,6 +354,7 @@ foreach ($f in $allFiles) {
             DiskLabel           = $label
             DiskSerialNumber    = $serial
             FileSystem          = $fileSystem
+            ClusterSize         = $clusterSize
             MediaType           = $mediaType
             TotalCapacityBytes  = $capacity
             UsedBytes           = $usedBytes
