@@ -23,11 +23,9 @@ snapshot_dir_to_deployer.py
      Вся инфраструктура разворачивается ИМЕННО относительно этого общего корня.
 
   3. Генератор создаёт deploy-скрипт, который:
-       - по умолчанию разворачивает структуру в каталоге, заданном
-         параметром --target-dir генератора (или в текущем каталоге
-         запуска генератора, если --target-dir не указан);
-       - создаёт внутри этой целевой директории такую же иерархию,
-         как относительно общего корня.
+       - по умолчанию разворачивает структуру в текущей директории запуска
+         deploy-скрипта;
+       - опционально принимает параметр --target для указания иной директории.
 
   4. Имя deploy-скрипта:
        - если указан -o/--output, используется это имя как есть;
@@ -44,7 +42,7 @@ from pathlib import Path
 from datetime import datetime
 
 
-GENERATOR_VERSION = "2.1.0"
+GENERATOR_VERSION = "3.0.0"
 
 
 def common_root_for_dirs_and_files(dir_paths, file_paths):
@@ -132,19 +130,18 @@ def generate_deploy_script(
     rel_files,
     output: Path,
     base_name: str,
-    default_target_root: Path,
 ):
     """
     Генерирует deploy-скрипт, который разворачивает инфраструктуру:
 
-      DEFAULT_TARGET_ROOT/
+      TARGET_ROOT/
         <структура rel_dirs / rel_files>
+
+    По умолчанию TARGET_ROOT = текущая директория запуска deploy-скрипта.
     """
     generated_at = datetime.now().isoformat(timespec="seconds")
     common_root_raw = str(common_root)
     common_root_escaped = common_root_raw.replace("\\", "\\\\")
-    default_target_root_raw = str(default_target_root.resolve())
-    default_target_root_escaped = default_target_root_raw.replace("\\", "\\\\")
 
     lines = []
 
@@ -157,17 +154,18 @@ def generate_deploy_script(
     )
     lines.append("")
     lines.append("Метаданные:")
-    lines.append(f"  * Общий корень инфраструктуры: {common_root_escaped}")
+    lines.append(f"  * Общий корень инфраструктуры (на момент генерации): {common_root_escaped}")
     lines.append(f"  * Дата генерации: {generated_at}")
     lines.append(f"  * Версия генератора: {GENERATOR_VERSION}")
-    lines.append(f"  * Каталог развёртывания по умолчанию: {default_target_root_escaped}")
     lines.append("")
-    lines.append("При запуске по умолчанию разворачивает структуру в DEFAULT_TARGET_ROOT;")
-    lines.append("опционально можно указать иной каталог через --target.")
+    lines.append(
+        "При запуске по умолчанию разворачивает структуру в текущей директории "
+        "запуска скрипта; опционально можно указать иной каталог через --target."
+    )
     lines.append("")
     lines.append("Примеры использования:")
     lines.append("")
-    lines.append("    # Развёртывание в каталог по умолчанию (см. DEFAULT_TARGET_ROOT)")
+    lines.append("    # Развёртывание в текущую директорию")
     lines.append(f"    python {output.name}")
     lines.append("")
     lines.append("    # Развёртывание в другую директорию")
@@ -182,7 +180,6 @@ def generate_deploy_script(
     lines.append(f"GENERATOR_VERSION = {GENERATOR_VERSION!r}")
     lines.append(f"GENERATED_AT = {generated_at!r}")
     lines.append(f"COMMON_ROOT = {common_root_escaped!r}")
-    lines.append(f"DEFAULT_TARGET_ROOT = {default_target_root_escaped!r}")
     lines.append("")
     lines.append("")
     lines.append("def apply_structure(target_root: Path):")
@@ -230,7 +227,7 @@ def generate_deploy_script(
     lines.append("")
     lines.append("        --target TARGET")
     lines.append("            Каталог, в котором разворачивать структуру.")
-    lines.append("            По умолчанию: DEFAULT_TARGET_ROOT.")
+    lines.append("            По умолчанию: текущая директория запуска скрипта.")
     lines.append("")
     lines.append("    Примеры:")
     lines.append("")
@@ -243,7 +240,7 @@ def generate_deploy_script(
     lines.append("        description=(")
     lines.append(
         "            'Развёртывает файловую инфраструктуру в каталоге TARGET "
-        "(по умолчанию DEFAULT_TARGET_ROOT).'"
+        "(по умолчанию текущая директория).'"
     )
     lines.append("        )")
     lines.append("    )")
@@ -251,14 +248,14 @@ def generate_deploy_script(
     lines.append("        '--target',")
     lines.append(
         "        help=('Каталог, в котором разворачивать структуру. "
-        "По умолчанию: DEFAULT_TARGET_ROOT.')"
+        "По умолчанию: текущая директория.')"
     )
     lines.append("    )")
     lines.append("    args = parser.parse_args()")
     lines.append("    if args.target:")
     lines.append("        target_root = Path(args.target)")
     lines.append("    else:")
-    lines.append("        target_root = Path(DEFAULT_TARGET_ROOT)")
+    lines.append("        target_root = Path('.')")
     lines.append("    return target_root")
     lines.append("")
     lines.append("")
@@ -291,8 +288,9 @@ def parse_args():
             "  -o/--output      : полное имя файла, если нужно задать явно;\n"
             "  --output-dir     : каталог, куда сохранить deploy-скрипт;\n"
             "  --name           : базовое имя (без .py), если -o не задан.\n\n"
-            "Целевая директория развёртывания:\n"
-            "  --target-dir     : DEFAULT_TARGET_ROOT для deploy-скрипта.\n\n"
+            "Развёртывание:\n"
+            "  deploy-скрипт по умолчанию разворачивает структуру в текущей\n"
+            "  директории запуска; можно указать другую через его параметр --target.\n\n"
             "Примеры:\n"
             "  # 1. Снимок одной директории\n"
             "  snapshot_dir_to_deployer.py --dirs ./PS/BackupOpticalDisk\n\n"
@@ -300,10 +298,9 @@ def parse_args():
             "  snapshot_dir_to_deployer.py \\\n"
             "      --dirs ./src ./config \\\n"
             "      --files ./README.md ./LICENSE\n\n"
-            "  # 3. Zадать директорию развёртывания и выходной каталог скрипта\n"
+            "  # 3. Записать deploy-скрипт в отдельный каталог\n"
             "  snapshot_dir_to_deployer.py \\\n"
             "      --dirs ./infra \\\n"
-            "      --target-dir D:/DeployRoot \\\n"
             "      --output-dir ./deploy_scripts\n\n"
             "  # 4. Полностью задать имя deploy-скрипта\n"
             "  snapshot_dir_to_deployer.py \\\n"
@@ -311,15 +308,6 @@ def parse_args():
             "      -o deploy_backup_infra.py\n"
         ),
         formatter_class=argparse.RawTextHelpFormatter,
-    )
-
-    parser.add_argument(
-        "--target-dir",
-        help=(
-            "Директория, в которую по умолчанию будет развёртывать инфраструктуру "
-            "сгенерированный deploy-скрипт (DEFAULT_TARGET_ROOT). "
-            "Если не указана, используется текущая директория запуска генератора."
-        ),
     )
 
     parser.add_argument(
@@ -417,19 +405,12 @@ def main_cli():
         filename = f"{base_name}_{ts}.py"
         out = output_dir / filename
 
-    # DEFAULT_TARGET_ROOT для deploy-скрипта
-    if args.target_dir:
-        default_target_root = Path(args.target_dir).resolve()
-    else:
-        default_target_root = Path.cwd().resolve()
-
     generate_deploy_script(
         common_root=common_root,
         rel_dirs=rel_dirs,
         rel_files=rel_files,
         output=out,
         base_name=base_name,
-        default_target_root=default_target_root,
     )
 
     print(f"Скрипт развёртывания сгенерирован: {out}")
